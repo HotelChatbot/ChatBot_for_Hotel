@@ -1,0 +1,89 @@
+<!-- Microphone testing: >> python -m SimpleHTTPServer -->
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/annyang/2.6.0/annyang.min.js"></script>
+    
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+
+  </head>
+
+  <body>
+
+    <h1>Say sth</h1>
+
+    <p id="display_text">I am listening</p>
+
+  <script src="https://cdn.socket.io/socket.io-1.7.3.js"></script>
+  <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+  <script>
+    $(function () {
+      var socket = io();
+
+      socket.emit('chat message', "jeff");
+
+      socket.on('chat message', function(msg){
+        display_speech(msg)
+      });
+    });
+  </script>
+
+  <!-- MUST put inside HTML, otherwise not working -->
+  <script>
+
+    // Socket.io part
+    /*
+    $(function () {
+      var socket = io();
+
+      //socket.emit("hello", "yo");
+      //alert("success");
+      
+      socket.on('hi', function(msg){
+        display_speech(msg)
+      });
+      
+    });
+    */
+
+
+    // Display the text upon the given sentence
+    function display_speech(sth) {
+      document.getElementById("display_text").innerHTML = sth;
+    }
+
+    // The speech recognition part
+    if (annyang) {
+      // Display the user input
+      annyang.addCallback('result', function(userSaid) {
+
+        var userInput = userSaid[0];
+        // Show user input
+        display_speech(userInput);
+
+        // Synthesis support. Make your web apps talk!
+        if ('speechSynthesis' in window) {
+          var msg = new SpeechSynthesisUtterance(userInput);
+          window.speechSynthesis.speak(msg);
+        } else {
+          display_speech("Google API not supported");
+        }
+
+      });
+
+      // Start listening.
+      annyang.start();
+    }
+
+  </script>
+
+
+  
+
+
+
+  </body>
+</html>
+
+
