@@ -1,11 +1,15 @@
 <!-- Microphone testing: >> python -m SimpleHTTPServer -->
-<!DOCTYPE html>
+<!doctype html>
 <html>
-
+  <title>ChatBot</title>
   <head>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/annyang/2.6.0/annyang.min.js"></script>
-    
-    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+
+    <!--<script src="https://code.jquery.com/jquery-1.11.1.js"></script>-->
+
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>-->
+
 
   </head>
 
@@ -15,37 +19,16 @@
 
     <p id="display_text">I am listening</p>
 
+  
+
+  <!-- MUST put inside HTML, otherwise not working -->
   <script src="https://cdn.socket.io/socket.io-1.7.3.js"></script>
   <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
   <script>
-    $(function () {
-      var socket = io();
 
-      socket.emit('chat message', "jeff");
 
-      socket.on('chat message', function(msg){
-        display_speech(msg)
-      });
-    });
-  </script>
-
-  <!-- MUST put inside HTML, otherwise not working -->
-  <script>
-
-    // Socket.io part
-    /*
-    $(function () {
-      var socket = io();
-
-      //socket.emit("hello", "yo");
-      //alert("success");
-      
-      socket.on('hi', function(msg){
-        display_speech(msg)
-      });
-      
-    });
-    */
+    // Create the socket for communication
+    var socket = io();
 
 
     // Display the text upon the given sentence
@@ -53,26 +36,45 @@
       document.getElementById("display_text").innerHTML = sth;
     }
 
+    // Produce voice output
+    // Synthesis support. Make your web apps talk!
+    function produce_voice_output(text) {
+      if ('speechSynthesis' in window) {
+        var sysOutput = new SpeechSynthesisUtterance(text);
+        window.speechSynthesis.speak(sysOutput);
+        display_speech(text);
+      } else {
+        display_speech("Google API not supported");
+      }
+    }
+        
+
     // The speech recognition part
     if (annyang) {
+
+      socket.emit("annyang", "Speech Recognition is ready");
+
       // Display the user input
       annyang.addCallback('result', function(userSaid) {
-
+        // Catch the highest possible input from user
         var userInput = userSaid[0];
+
         // Show user input
         display_speech(userInput);
 
-        // Synthesis support. Make your web apps talk!
-        if ('speechSynthesis' in window) {
-          var msg = new SpeechSynthesisUtterance(userInput);
-          window.speechSynthesis.speak(msg);
-        } else {
-          display_speech("Google API not supported");
-        }
+        // Notify the server to send api.ai this input
+        socket.emit("send_to_apiai", userInput);
+
+        // Wait for the response from the server along with the response from api.ai
+        socket.on("response_from_apiai", function(response){
+          // Speak out the response
+          produce_voice_output(response);
+
+        });
 
       });
 
-      // Start listening.
+      // Start listening
       annyang.start();
     }
 
