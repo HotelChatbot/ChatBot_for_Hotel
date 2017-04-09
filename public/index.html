@@ -1,7 +1,7 @@
 <!-- Microphone testing: >> python -m SimpleHTTPServer -->
 <!doctype html>
 <html>
-  <title>ChatBot</title>
+  <title>DemoAgent</title>
   <head>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/annyang/2.6.0/annyang.min.js"></script>
@@ -9,40 +9,41 @@
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script src="https://cdn.socket.io/socket.io-1.7.3.js"></script>
 
+
+    <link rel="stylesheet" type="text/css" href="style.css">
+
   </head>
 
   <body>
 
-    <h1>Say something...</h1>
+    <h1>Hotel Agent</h1>
 
     <p id="display_text">I am listening</p>
 
-    <!--<input id="start_button" type="button" value="Start"></input>-->
+    <hr/>
 
+    <h3>Connection with DemoAgent(Disabled if with ServerTest)</h3>
+    <!-- Rectangular switch -->
+    <label class="switch">
+      <input id="serverToggle" type="checkbox" checked>
+      <div class="slider"></div>
+    </label>
   
   
   <script>
+    var isConnectToDemoAgent = true; 
 
-    /*
+    // Page Loaded
     $(function() {
-      //annyang.abort();
-      //annyang = false;
+      $('#serverToggle').change(function() {
+        isConnectToDemoAgent = this.checked;
+        console.log("Agent Switched: Connect to DemoAgent? " + isConnectToDemoAgent);
+      });
 
-      var start_button = document.getElementById("start_button");
-      start_button.onclick = function() {
-        // Start to listen
-        if (start_button.value == "Start"){
-          start_button.value = "Finish";
-          //annyang.resume();
-          //annyang = true;
-        } else {
-          start_button.value = "Start";
-          //annyang.pause();
-          //annyang = false;
-        }
-      };
     });
-    */
+
+
+    // Prevent duplicate output speech from system
     var sysCanOutput = false;
 
     // Create the socket for communication
@@ -66,14 +67,14 @@
           display_speech("Google API not supported");
         }
       }
-      
     }
+
+
+
         
 
     // The speech recognition part
     if (annyang) {
-      //annyang.pause();
-
 
       // Tell KITT to use annyang
       SpeechKITT.annyang();
@@ -95,7 +96,7 @@
         display_speech(userInput);
 
         // Notify the server to send api.ai this input
-        socket.emit("send_to_apiai", userInput);
+        socket.emit("send_to_apiai", [userInput, isConnectToDemoAgent]);
         sysCanOutput = true;
 
         // Wait for the response from the server along with the response from api.ai
