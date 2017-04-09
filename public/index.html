@@ -22,11 +22,11 @@
 
     <hr/>
 
-    <h3>Connection with DemoAgent(Disabled if with ServerTest)</h3>
+    <h3>User Mode (Disabled if in Test Mode)</h3>
     <!-- Rectangular switch -->
     <label class="switch">
       <input id="serverToggle" type="checkbox" checked>
-      <div class="slider"></div>
+      <div class="slider round"></div>
     </label>
   
   
@@ -37,6 +37,11 @@
     $(function() {
       $('#serverToggle').change(function() {
         isConnectToDemoAgent = this.checked;
+        if(isConnectToDemoAgent){
+          document.title = "Demo Agent";
+        } else {
+          document.title = "Server Test";
+        }
         console.log("Agent Switched: Connect to DemoAgent? " + isConnectToDemoAgent);
       });
 
@@ -68,10 +73,7 @@
         }
       }
     }
-
-
-
-        
+  
 
     // The speech recognition part
     if (annyang) {
