@@ -15,10 +15,12 @@ var TOKEN_ServerTest = "8010c7fae89f4faeb8fe10470ae77742";
 // Initialize the front-end
 app.use(express.static("public"));
 
+// Build up the routers
+require('./app/routes.js')(app);
+
 // Detect any connection
 io.on('connection', function(socket){
-  //console.log(socket.handshake.address);
-  //console.log(socket.request.connection.remoteAddress);
+
   // Get the client's connection port
   var portNum = socket.request.connection.remotePort
   console.log("Connection on port" + portNum);
@@ -36,6 +38,7 @@ io.on('connection', function(socket){
     console.log("Agent Switched: Connect to DemoAgent? " + isConnectToDemoAgent);
 
     console.log("Send to api.ai: " + msg);
+
 
     // Connection with api.ai
     var appAPIAI;
