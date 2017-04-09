@@ -6,7 +6,7 @@ var io = require('socket.io')(http);
 var port = process.env.PORT || 8080;
 // Connection with api.ai
 var apiai = require('apiai');
-var appAPIAI = apiai("8010c7fae89f4faeb8fe10470ae77742");
+var appAPIAI = apiai("ecc353311a954139b3ff036c8f6eb2ae");
 
 // Initialize the front-end
 app.get('/', function(req, res){
