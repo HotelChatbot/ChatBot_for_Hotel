@@ -95,3 +95,50 @@ http.listen(port, function(){
 // Initialize the front-end
 app.use(express.static("public"));
 
+function eval_function(action, response, portNum){
+  switch(action){
+    case "recommend_restaurant":
+      var priceRequest = response.result.parameters["unit-currency"];
+      var styleRequest = response.result.parameters["restaurant_style"];
+      //update parameter if the response is not empty
+      if(priceRequest.length) user_data[portNum]['restaurant_price'] = priceRequest;
+      if(priceRequest.length) user_data[portNum]['restaurant_style'] = styleRequest;
+      console.log(user_data); 
+
+      //read restaurant csv file
+      d3.csv("/restaurant.csv", function(data) {
+        var currentPrice = 0;
+        var currentRestaurant = null;
+        styleRequest = user_data[portNum]['restaurant_style'];
+
+        if(data){
+          //loop over each row of data
+          data.forEach(function(row) {
+            //if the restaurant has not recommended yet
+            if(!user_data[portNum]['recommend_restaurant'].has( row.name )){
+              var price = row.price;
+              //we want to match the restaurant whose price is the closest to the price request
+              if(price < parseInt(priceRequest) && price >currentPrice && row.style == styleRequest){
+                currentPrice = price;
+                currentRestaurant = row.name;
+
+              }
+            }
+          });
+          //no restaurant found
+          if(currentRestaurant == null){
+
+          }
+          //add current restaurant to the set so the you don't duplicate recommendation
+          user_data[portNum]['recommend_restaurant'].add(currentRestaurant);
+
+        }
+        else{
+          console.log("no data");   
+        }
+        
+      });
+      break;
+  }
+  return response
+}
