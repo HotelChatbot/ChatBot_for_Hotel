@@ -4,7 +4,7 @@ var http = require('http').Server(app);
 // Base socket.io on express app
 var io = require('socket.io')(http);
 // Constanize the port number
-var port = process.env.PORT || 80;
+var port = process.env.PORT || 8080;
 // Dialog Manager
 var apiai = require('apiai');
 
