@@ -1,8 +1,8 @@
-id,name,price,description
-1,Yilan,100,description
-2,Erlan,150,description
-3,Sanlan,200,description
-4,Silan,250,description
-5,Wulan,300,description
-6,Liulan,350,description
-7,Qilan,400,description
+id,name,price,location,style
+1,Yilan,100,location, japanese
+2,Erlan,150,location, korean
+3,Sanlan,200,location, chinese
+4,Silan,250,location, french
+5,Wulan,300,location, BBQ
+6,Liulan,350,location, italian
+7,Qilan,400,location, indian
