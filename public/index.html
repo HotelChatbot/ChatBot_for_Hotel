@@ -1,3 +1,4 @@
+
 <!-- Microphone testing: >> python -m SimpleHTTPServer -->
 <!doctype html>
 <html>
@@ -28,6 +29,16 @@
       <input id="serverToggle" type="checkbox" checked>
       <div class="slider round"></div>
     </label>
+
+
+    <hr/>
+
+    <h3>Text Mode</h3>
+    <!--<form method="post" action="/api/textInput">-->
+      Message: <input type="text" id="userText" name="userText"><br>
+      <input id="userTextButton" type="submit" value="Submit">
+    <!--</form>-->
+
   
   
   <script>
@@ -44,6 +55,23 @@
         }
         console.log("Agent Switched: Connect to DemoAgent? " + isConnectToDemoAgent);
       });
+
+
+      $('#userTextButton').click(function(){
+        var userInput = $('#userText').val();
+        // Show user input
+        display_speech(userInput);
+        // Notify the server to send api.ai this input
+        socket.emit("send_to_apiai", [userInput, isConnectToDemoAgent]);
+        sysCanOutput = true;
+        // Wait for the response from the server along with the response from api.ai
+        socket.on("response_from_apiai", function(response){
+          console.log("response_from_apiai: " + response);
+          // Speak out the response
+          produce_voice_output(response);
+        });
+      });
+
 
     });
 
