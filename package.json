@@ -11,7 +11,10 @@
   "license": "ISC",
   "dependencies": {
     "apiai": "^4.0.2",
+<<<<<<< HEAD
     "body-parser": "^1.17.1",
+=======
+>>>>>>> 7754a8e5dc11ab79b5180cef121e140366c0cd18
     "express": "^4.15.2",
     "http": "0.0.0",
     "request": "^2.81.0",

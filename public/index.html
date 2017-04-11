@@ -29,6 +29,7 @@
       <div class="slider round"></div>
     </label>
 
+
     <hr/>
 
     <h3>Text Mode</h3>
@@ -36,6 +37,7 @@
       Message: <input type="text" id="userText" name="userText"><br>
       <input id="userTextButton" type="submit" value="Submit">
     <!--</form>-->
+
   
   
   <script>
@@ -53,6 +55,7 @@
         console.log("Agent Switched: Connect to DemoAgent? " + isConnectToDemoAgent);
       });
 
+
       $('#userTextButton').click(function(){
         var userInput = $('#userText').val();
         // Show user input
@@ -67,6 +70,7 @@
           produce_voice_output(response);
         });
       });
+
 
     });
 

@@ -7,6 +7,7 @@ var io = require('socket.io')(http);
 var port = process.env.PORT || 8080;
 // Parse the request body
 var bodyParser = require('body-parser');
+
 // Dialog Manager
 var apiai = require('apiai');
 
@@ -16,6 +17,7 @@ var TOKEN_ServerTest = "8010c7fae89f4faeb8fe10470ae77742";
 
 // Initialize the front-end
 app.use(express.static("public"));
+
 
 // Enable auto parsing the request body
 app.use(bodyParser.urlencoded({ extended: true })); 
@@ -30,7 +32,6 @@ io.on('connection', function(socket){
   // Get the client's connection port
   var portNum = socket.request.connection.remotePort
   console.log("Connection on port" + portNum);
-
   
   // Waiting for the start of the speech recognition
   socket.on('annyang', function(msg){

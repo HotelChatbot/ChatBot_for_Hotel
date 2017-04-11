@@ -52,4 +52,8 @@ input:checked + .slider:before {
 
 .slider.round:before {
   border-radius: 50%;
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7754a8e5dc11ab79b5180cef121e140366c0cd18
