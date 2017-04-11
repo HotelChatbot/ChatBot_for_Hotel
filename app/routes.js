@@ -5,4 +5,8 @@ module.exports = function(app) {
     res.json({"status":"OK"});
   });
 
+  app.post('/api/textInput', function(req, res) {
+    res.send(req.body.userText);
+  });
+
 }
