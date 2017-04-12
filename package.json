@@ -12,10 +12,11 @@
   "dependencies": {
     "apiai": "^4.0.2",
     "body-parser": "^1.17.1",
+    "d3": "^4.7.4",
     "express": "^4.15.2",
     "http": "0.0.0",
+    "promise": "^7.1.1",
     "request": "^2.81.0",
     "socket.io": "^1.7.3"
   }
 }
-
