@@ -1,4 +1,3 @@
-
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
@@ -6,23 +5,50 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 // Constanize the port number
 var port = process.env.PORT || 80;
-// Dialog Manager
-var apiai = require('apiai');
+
+// read csv file
 var d3 = require('d3');
 
-// Initialize the front-end
-app.use(express.static("public"));
+// Use mongoose to manipulate mongoDB
+var mongoose = require('mongoose');
+// Load the database config
+var database = require('./config/database');
+
+// Parse the request body
+var bodyParser = require('body-parser');
+
+// Dialog Manager
+var apiai = require('apiai');
 
 // Global Initialization
 var TOKEN_DemoAgent = "ecc353311a954139b3ff036c8f6eb2ae";
 var TOKEN_ServerTest = "8010c7fae89f4faeb8fe10470ae77742";
 
 
+// Connect to database with specification
+if (process.env.PORT) {
+  mongoose.connect(database.remoteUrl);
+} else {
+  mongoose.connect(database.localUrl);
+}
+
+// Initialize the front-end
+app.use(express.static("public"));
+
+
+// Enable auto parsing the request body
+app.use(bodyParser.urlencoded({ extended: true }));
+// parse application/json
+app.use(bodyParser.json()); 
+// parse application/vnd.api+json as json
+app.use(bodyParser.json({type: 'application/vnd.api+json'})); 
+
 var user_data = {};
 var restaurant_data = [];
 
 // Build up the routers
 require('./app/routes.js')(app);
+
 
 // Detect any connection
 io.on('connection', function(socket){
@@ -48,7 +74,6 @@ io.on('connection', function(socket){
 
     // Connection with api.ai
     var appAPIAI;
-    
     if (isConnectToDemoAgent){
       appAPIAI = apiai(TOKEN_DemoAgent);
       console.log("DemoAgent connected");
@@ -63,15 +88,17 @@ io.on('connection', function(socket){
       sessionId: portNum
     });
 
-
+    //if user has not been initailized
+    if(!user_data[portNum]){
+      //initailize user
+      user_data[portNum] = 
+      { 'restaurant_style':"",
+        'restaurant_price':"",
+        'restaurant_name': ""
+      };
+      user_data[portNum]['recommend_restaurant'] = new Set()  
+    }
     
-    //initailize user
-    user_data[portNum] = 
-    { 'restaurant_style':"",
-      'restaurant_price':"",
-      'restaurant_name': ""
-    };
-    user_data[portNum]['recommend_restaurant'] = new Set()
 
     // Waiting for the response from api.ai
     request.on('response', function(response) {
@@ -107,9 +134,9 @@ http.listen(port, function(){
   console.log('listening on *:' + port);
   //read db into server
   read_csv();
+
+
 });
-
-
 
 function eval_function(action, response, portNum){
   switch(action){
@@ -194,15 +221,15 @@ function restaurant_give_detail(response, portNum){
     var style = restaurant.style;
     var location = restaurant.location;
     //if the restaurant has not recommended yet
-    if(!user_data[portNum]['recommend_restaurant'].has( name )){
+    if(name == user_data[portNum]['restaurant_name']){
 
-      console.log(name, user_data[portNum]['restaurant_name']);
-      if(name == user_data[portNum]['restaurant_name']){
         response = "the restaurant is located at " + location + "and it costs you around "+ price;
-      }
-      
-      
     }
+    
+      
+      
+      
+    
   });
   
   return response;
@@ -232,13 +259,12 @@ function read_csv(){
           'name': restaurant_name,
           'style': restaurant_stlye,
           'price': price,
-          'locatoin': location
+          'location': location
         }
         restaurant_data.push(restaurant);    
       });  
     }
    console.log(restaurant_data);
   });
-  
-
 }
+
