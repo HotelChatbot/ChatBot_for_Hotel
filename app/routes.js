@@ -1,3 +1,4 @@
+
 // Load the database model
 var Restaurant = require('./models/Restaurant');
 
@@ -34,5 +35,6 @@ module.exports = function(app) {
       res.json(restaurants);
     });
   });
+
 
 }
