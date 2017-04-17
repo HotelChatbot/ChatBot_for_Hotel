@@ -45,6 +45,8 @@ app.use(bodyParser.json({type: 'application/vnd.api+json'}));
 
 var user_data = {};
 var restaurant_data = [];
+var room_facility_data = [];
+var hotel_facility_data = [];
 
 // Build up the routers
 require('./app/routes.js')(app);
@@ -94,9 +96,11 @@ io.on('connection', function(socket){
       user_data[portNum] = 
       { 'restaurant_style':"",
         'restaurant_price':"",
-        'restaurant_name': ""
+        'restaurant_name': "",
+        'last_inquired_facility' : ""
       };
-      user_data[portNum]['recommend_restaurant'] = new Set()  
+      user_data[portNum]['recommend_restaurant'] = new Set() ;
+      user_data[portNum]['restaurant_price_request'] = ['<', '1000'];
     }
     
 
@@ -141,12 +145,25 @@ http.listen(port, function(){
 function eval_function(action, response, portNum){
   switch(action){
     case "recommend_restaurant":
+    case "recommend_another_restaurant":
       response = recommend_restaurant(response,portNum);
       break;
     case "restaurant_give_detail":
       response =  restaurant_give_detail(response,portNum);
       break;
-  }
+    case "restaurant_check_price":
+      response = restaurant_check_price(response, portNum);
+      break;
+    case "restaurant_price_switch":
+      response = restaurant_price_switch(response, portNum);
+      break;
+    case "restaurant_style_switch":
+      response = restaurant_style_switch(response, portNum);
+      break;
+    case "inquire_hotel_facility":
+      response = inquire_hotel_facility(response, portNum);
+      break;
+  }   
   console.log("eval_function");
   return response
 }
@@ -155,13 +172,31 @@ function eval_function(action, response, portNum){
 
 function recommend_restaurant(response, portNum){
   //console.log(response.result);
-  var priceRequest = response.result.parameters['unit-currency'];
-  var styleRequest = response.result.parameters["restaurant_style"];
+  var priceRequest = "";
+  var styleRequest = "";
+  if( 'unit-currency' in response.result.parameters){
+    priceRequest = parse_price(response.result.parameters['unit-currency']);  
+  }
+  if('restaurant_style' in response.result.parameters){
+    styleRequest = response.result.parameters["restaurant_style"];
+  }
    
-  //update parameter if the response is not empty
-  if(priceRequest.length > 0) user_data[portNum]['restaurant_price'] = priceRequest;
-  if(styleRequest.length > 0) user_data[portNum]['restaurant_style'] = styleRequest;
   
+  //update parameter if the response is not empty
+  if(priceRequest && priceRequest.length > 0){
+    user_data[portNum]['restaurant_price_request'][0] = '<';
+    user_data[portNum]['restaurant_price_request'][1] = priceRequest;
+
+  } else{
+    priceRequest = user_data[portNum]['restaurant_price_request'][1];
+  }
+  if(styleRequest && styleRequest.length > 0) {
+    user_data[portNum]['restaurant_style'] = styleRequest;
+  }
+  else{
+    styleRequest = user_data[portNum]['restaurant_style'];
+  }
+  console.log("priceRequest",priceRequest);
   var currentPrice = "";
   var currentRestaurant = "";
   //read restaurant csv file
@@ -177,11 +212,15 @@ function recommend_restaurant(response, portNum){
 
       //we want to match the restaurant whose price is the closest to the price request
       
-      if( style == styleRequest){
+      if( style == user_data[portNum]['restaurant_style']){
         
-        if(priceRequest.length == 0 || (parseInt(price) < parseInt(priceRequest) && parseInt(price) >currentPrice)){
-          currentPrice = parseInt(price);
+        if((parseInt(price) <= parseInt(priceRequest) &&user_data[portNum]['restaurant_price_request'][0] == '<') ||
+          (parseInt(price) >= parseInt(priceRequest) &&user_data[portNum]['restaurant_price_request'][0] == '>')){
           currentRestaurant = name;
+          //update current user's data
+          user_data[portNum]['restaurant_price'] = price;
+          user_data[portNum]['restaurant_name'] = currentRestaurant;
+          
            
         }
       }
@@ -200,13 +239,10 @@ function recommend_restaurant(response, portNum){
   else{
     //add current restaurant to the set so that you don't duplicate recommendation
     user_data[portNum]['recommend_restaurant'].add(currentRestaurant);
-    //update current user's data
-    user_data[portNum]['restaurant_style'] = styleRequest;
-    user_data[portNum]['restaurant_name'] = currentRestaurant;
-    user_data[portNum]['restaurant_price'] = priceRequest;
+    
     console.log(user_data);
     //concatenate data into response
-    response = "Here is a "+ styleRequest + " restaurant called " + currentRestaurant +" that costs around " +currentPrice;  
+    response = "Here is a "+ user_data[portNum]['restaurant_style'] + " restaurant called " + currentRestaurant +" that costs around " +user_data[portNum]['restaurant_price'];  
   }
   
   
@@ -214,7 +250,8 @@ function recommend_restaurant(response, portNum){
 }
 
 function restaurant_give_detail(response, portNum){
-  console.log(user_data);
+  var priceRequest = parse_price(response.result.parameters['unit-currency']);
+  
   restaurant_data.forEach(function(restaurant){
     var name = restaurant.name;
     var price = restaurant.price;
@@ -224,14 +261,103 @@ function restaurant_give_detail(response, portNum){
     if(name == user_data[portNum]['restaurant_name']){
 
         response = "the restaurant is located at " + location + "and it costs you around "+ price;
-    }
-    
-      
-      
-      
+    }   
     
   });
+  return response;
+}
+
+function restaurant_check_price(response, portNum){
+  var priceRequest = parse_price(user_data[portNum]['restaurant_price']);
   
+  restaurant_data.forEach(function(restaurant){
+    var name = restaurant.name;
+    var price = restaurant.price;
+    var style = restaurant.style;
+    var location = restaurant.location;
+    //if the restaurant has not recommended yet
+    if(name == user_data[portNum]['restaurant_name']){
+
+        response = "the restaurant costs you around "+ price;
+    }   
+    
+  });
+  return response;
+}
+function restaurant_price_switch(response, portNum){
+  console.log(user_data);
+
+  var priceRequest = response.result.parameters["price_request"];
+  
+  if( priceRequest=="lower" ){
+    user_data[portNum]['restaurant_price_request'][0] == '<';
+    //to string
+    user_data[portNum]['restaurant_price_request'][1] = (parseInt(user_data[portNum]['restaurant_price']) -1) + '' ;
+  }
+  else{
+    user_data[portNum]['restaurant_price_request'][0] == '>';
+    //to string
+    user_data[portNum]['restaurant_price_request'][1] = (parseInt(user_data[portNum]['restaurant_price']) +1) + '' ;
+  }
+
+  console.log("rpr",user_data[portNum]['restaurant_price_request'][1]);
+  return recommend_restaurant(response, portNum);
+}
+
+function restaurant_style_switch(response, portNum){
+  
+  user_data[portNum]['restaurant_style'] = response.result.parameters["restaurant_style"];
+  return recommend_restaurant(response, portNum);
+}
+
+
+
+function inquire_hotel_facility(response, portNum){
+  //if user has already inquired a facility
+  var inquiredFacility = "";
+  var closeOrOpen = "";
+  if(user_data[portNum]["last_inquired_facility"].length &&user_data[portNum]["last_inquired_facility"].length > 0){
+    inquiredFacility =  user_data[portNum]["last_inquired_facility"];
+  }
+  else{
+    inquiredFacility = response.result.parameters["hotel_facility"];
+  }
+  var inquiryParameter = response.result.parameters["inquiry_parameter"];
+  if("hotel_facility_close_open" in response.result.parameters){
+    closeOrOpen = response.result.parameters["hotel_facility_close_open"];  
+  }
+  
+  var inquiredLocation= "";
+  var inquiredTime = "";
+  
+  //if there is no such facility
+  if(inquiredLocation == ""){
+    response = "Sorry we don't have such facility";
+  }
+  hotel_facility_data.forEach(function(hotel_facility){
+    
+    var name = hotel_facility.name;
+    var location = hotel_facility.location;
+    var opening_time = hotel_facility.opening_time;
+    var closing_time = hotel_facility.closing_time;
+
+    if(name == inquiredFacility){
+      inquiredLocation = location;
+      
+      //if the inquiry is about closing or opening time
+      if(inquiryParameter == "time"){
+        if(closeOrOpen == "close"){
+          response = name + " will close at "+ closing_time;
+        }
+        else{
+           response = name + " will close at "+ opening_time; 
+        }
+      } 
+      else{
+        response = name + " is "+ location;
+      }
+    }
+  });
   return response;
 }
 
@@ -244,27 +370,74 @@ function parse_price(unit_currency){
 }
 
 function read_csv(){
+  //read in restaurant data
   d3.csv("/restaurant.csv", function(data) {
     if(data){
       //console.log(data);
       var i=0;
       data.forEach(function(row) {
         var restaurant_name = row.name;
-        var restaurant_stlye = row.style;
+        var restaurant_style = row.style;
         var price = row.price;
         var location = row.location;
         
         
         restaurant = {
           'name': restaurant_name,
-          'style': restaurant_stlye,
+          'style': restaurant_style,
           'price': price,
           'location': location
         }
         restaurant_data.push(restaurant);    
       });  
     }
-   console.log(restaurant_data);
+   // console.log(restaurant_data);
+  });
+  //read in room facility data
+  d3.csv("/room_facility.csv", function(data) {
+    if(data){
+      //console.log(data);
+      var i=0;
+      data.forEach(function(row) {
+        var name = row.name;
+        var location = row.location;
+        
+        
+        
+        var facility = {
+          'name': name,
+          'location': location
+          
+        }
+        room_facility_data.push(facility);    
+      });  
+    }
+   //console.log(room_facility_data);
+  });
+  //read in hotel facility data
+  d3.csv("/hotel_facility.csv", function(data) {
+    if(data){
+      
+      
+      data.forEach(function(row) {
+        var name = row.name;
+        var location = row.location;
+        var opening_time = row.opening_time;
+        var closing_time = row.closing_time;
+        
+        
+        var facility = {
+          'name': name,
+          'location': location,
+          'opening_time': opening_time,
+          'closing_time': closing_time
+          
+        }
+
+        hotel_facility_data.push(facility);    
+      });  
+    }
+   console.log(hotel_facility_data);
   });
 }
 
