@@ -163,6 +163,9 @@ function eval_function(action, response, portNum){
     case "inquire_hotel_facility":
       response = inquire_hotel_facility(response, portNum);
       break;
+    case "inquire_room_facility":
+      response = inquire_room_facility(response, portNum);
+      break;
   }   
   console.log("eval_function");
   return response
@@ -285,8 +288,6 @@ function restaurant_check_price(response, portNum){
   return response;
 }
 function restaurant_price_switch(response, portNum){
-  console.log(user_data);
-
   var priceRequest = response.result.parameters["price_request"];
   
   if( priceRequest=="lower" ){
@@ -300,7 +301,6 @@ function restaurant_price_switch(response, portNum){
     user_data[portNum]['restaurant_price_request'][1] = (parseInt(user_data[portNum]['restaurant_price']) +1) + '' ;
   }
 
-  console.log("rpr",user_data[portNum]['restaurant_price_request'][1]);
   return recommend_restaurant(response, portNum);
 }
 
@@ -331,9 +331,9 @@ function inquire_hotel_facility(response, portNum){
   var inquiredTime = "";
   
   //if there is no such facility
-  if(inquiredLocation == ""){
-    response = "Sorry we don't have such facility";
-  }
+  
+  response = "Sorry we don't have such facility";
+  
   hotel_facility_data.forEach(function(hotel_facility){
     
     var name = hotel_facility.name;
@@ -350,7 +350,7 @@ function inquire_hotel_facility(response, portNum){
           response = name + " will close at "+ closing_time;
         }
         else{
-           response = name + " will close at "+ opening_time; 
+           response = name + " will open at "+ opening_time; 
         }
       } 
       else{
@@ -361,10 +361,26 @@ function inquire_hotel_facility(response, portNum){
   return response;
 }
 
+function inquire_room_facility(response, portNum){
+  var inquired_facility = response.result.parameters["Roomservicetype"];  
+  response = "Sorry we don't have such room facility.";
+
+  room_facility_data.forEach(function(room_facility){
+    var name = room_facility.name;
+    var location = room_facility.location;
+
+    if(name == inquired_facility){
+      response = name + " is " + location;
+    }
+  });
+
+  return response;
+}
 function parse_price(unit_currency){
   //check if unit_currency is an object
+  console.log("unit_currency", unit_currency.amount);
   if(typeof(unit_currency) == "object"){
-    return unit_currency.currency;
+    return String(unit_currency.amount);
   }
   else return unit_currency;
 }
@@ -415,6 +431,7 @@ function read_csv(){
    //console.log(room_facility_data);
   });
   //read in hotel facility data
+  
   d3.csv("/hotel_facility.csv", function(data) {
     if(data){
       
