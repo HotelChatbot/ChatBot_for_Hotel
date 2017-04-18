@@ -1,13 +1,11 @@
-# ChatBot_for_Hotel
+# Intelligent ChatBot for Better Hotel Experience
 
-### Initialization
+## Installation
 #### Download the project
 `git clone https://github.com/HotelChatbot/ChatBot_for_Hotel.git`
-#### Enter the project
+#### Enter the project directory
 `cd ChatBot_for_Hotel`
 #### Download all the dependencies
 `npm i`
-#### Enable nodemon
-`npm i -g nodemon`
-#### Start off the server
+#### Start off the server & and cheer!!
 `nodemon server`
