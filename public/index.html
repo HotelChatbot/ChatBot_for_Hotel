@@ -63,6 +63,14 @@
         sendAndWaitToOutputAPIAI(userInput);
       });
 
+      // Allow ENTER-key press to trigger text enter
+      $("#userText").keyup(function(e){
+        if(e.keyCode === 13){
+          e.preventDefault();
+          $('#userTextButton').click()
+        }
+      });
+
     });
 
 
