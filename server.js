@@ -200,6 +200,7 @@ function recommend_restaurant(response, portNum){
     styleRequest = user_data[portNum]['restaurant_style'];
   }
   console.log("priceRequest",priceRequest);
+  console.log("styleRequest",styleRequest);
   var currentPrice = "";
   var currentRestaurant = "";
   //read restaurant csv file
@@ -235,7 +236,13 @@ function recommend_restaurant(response, portNum){
     //might need to come up with a way to recommend user restaurant with another style
     //might need to reset context here
     console.log("No restaurant");
-    response = "Sorry we cannot find any restaurant that meets your criteria. What kind of restaurant do you like";
+    if(styleRequest==""){
+      response = "What kind of restaurant do you like?";  
+    }
+    else{
+      response = "Sorry we cannot find any restaurant that meets your criteria. What kind of restaurant do you like";  
+    }
+    
     
     
   }
