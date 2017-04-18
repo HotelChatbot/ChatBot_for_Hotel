@@ -394,7 +394,7 @@ function parse_price(unit_currency){
 
 function read_csv(){
   //read in restaurant data
-  d3.csv("/restaurant.csv", function(data) {
+  d3.csv("/public/restaurant.csv", function(data) {
     if(data){
       //console.log(data);
       var i=0;
@@ -417,7 +417,7 @@ function read_csv(){
    // console.log(restaurant_data);
   });
   //read in room facility data
-  d3.csv("/room_facility.csv", function(data) {
+  d3.csv("/public/room_facility.csv", function(data) {
     if(data){
       //console.log(data);
       var i=0;
@@ -439,7 +439,7 @@ function read_csv(){
   });
   //read in hotel facility data
   
-  d3.csv("/hotel_facility.csv", function(data) {
+  d3.csv("/public/hotel_facility.csv", function(data) {
     if(data){
       
       
