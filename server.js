@@ -497,7 +497,7 @@ function read_csv(){
         restaurant_data.push(restaurant);    
       });  
     }
-   // console.log(restaurant_data);
+    console.log(restaurant_data);
   });
   
   //read in room facility data
@@ -524,6 +524,7 @@ function read_csv(){
 
   //read in hotel facility data
   d3.csv("/hotel_facility.csv", function(data) {
+
     if(data){
       
       
