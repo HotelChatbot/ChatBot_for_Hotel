@@ -144,8 +144,15 @@ http.listen(port, function(){
 
 });
 
-
-//evalate action and determine system response
+/**
+* Evaluate function passed by api.ai.
+*
+* @method eval_action
+* @param {String} action Action passed from api.ai.
+* @param {String} response Speech response passed from api.ai.
+* @param {Integer} portNum Current end user's port number connecting to the server
+* @return {String} response Speech response that will return to the end user.
+*/
 function eval_action(action, response, portNum){
   switch(action){
     case "recommend_restaurant":
@@ -176,7 +183,14 @@ function eval_action(action, response, portNum){
 }
 
 
-//basic recommend_restaurant function
+/**
+* Basic recommend restaurant function.
+*
+* @method recommend_restaurant
+* @param {String} response Speech response passed from api.ai.
+* @param {Integer} portNum Current end user's port number connecting to the server
+* @return {String} response Speech response that will return to the end user.
+*/
 function recommend_restaurant(response, portNum){
   //extract user request from the JSON response
   var priceRequest = "";
@@ -265,7 +279,14 @@ function recommend_restaurant(response, portNum){
   return response;
 }
 
-//provide user information about the restaurant
+/**
+* Provide user information about the restaurant.
+*
+* @method restaurant_give_detail
+* @param {String} response Speech response passed from api.ai.
+* @param {Integer} portNum Current end user's port number connecting to the server
+* @return {String} response Speech response that will return to the end user.
+*/
 function restaurant_give_detail(response, portNum){
   //get user's request from JSON response
   var priceRequest = parse_price(response.result.parameters['unit-currency']);
@@ -285,7 +306,14 @@ function restaurant_give_detail(response, portNum){
   return response;
 }
 
-//provide user price of the restaurant
+/**
+* Provide user price of the restaurant.
+*
+* @method restaurant_check_price
+* @param {String} response Speech response passed from api.ai.
+* @param {Integer} portNum Current end user's port number connecting to the server
+* @return {String} response Speech response that will return to the end user.
+*/
 function restaurant_check_price(response, portNum){
   //get user's request from JSON response
   var priceRequest = parse_price(user_data[portNum]['restaurant_price']);
@@ -305,7 +333,14 @@ function restaurant_check_price(response, portNum){
   return response;
 }
 
-//request a resturant with different price range
+/**
+* Request a resturant with different price range.
+*
+* @method restaurant_price_switch
+* @param {String} response Speech response passed from api.ai.
+* @param {Integer} portNum Current end user's port number connecting to the server
+* @return {String} response Speech response that will return to the end user.
+*/
 function restaurant_price_switch(response, portNum){
   //get user's request from JSON response
   var priceRequest = response.result.parameters["price_request"];
@@ -325,7 +360,14 @@ function restaurant_price_switch(response, portNum){
   return recommend_restaurant(response, portNum);
 }
 
-//request a resturant with different restaurant style
+/**
+* Request a resturant with different restaurant style.
+*
+* @method restaurant_style_switch
+* @param {String} response Speech response passed from api.ai.
+* @param {Integer} portNum Current end user's port number connecting to the server
+* @return {String} response Speech response that will return to the end user.
+*/
 function restaurant_style_switch(response, portNum){
   
   user_data[portNum]['restaurant_style'] = response.result.parameters["restaurant_style"];
@@ -333,7 +375,14 @@ function restaurant_style_switch(response, portNum){
 }
 
 
-//inquire about hotel facility
+/**
+* Inquire about hotel facility.
+*
+* @method inquire_hotel_facility
+* @param {String} response Speech response passed from api.ai.
+* @param {Integer} portNum Current end user's port number connecting to the server
+* @return {String} response Speech response that will return to the end user.
+*/
 function inquire_hotel_facility(response, portNum){
   //if user has already inquired a facility
   var inquiredFacility = "";
@@ -382,7 +431,15 @@ function inquire_hotel_facility(response, portNum){
   });
   return response;
 }
-//inquire about room facility
+
+/**
+* Inquire about room facility.
+*
+* @method inquire_room_facility
+* @param {String} response Speech response passed from api.ai.
+* @param {Integer} portNum Current end user's port number connecting to the server
+* @return {String} response Speech response that will return to the end user.
+*/
 function inquire_room_facility(response, portNum){
   var inquired_facility = response.result.parameters["Roomservicetype"];  
   response = "Sorry we don't have such room facility.";
@@ -399,7 +456,13 @@ function inquire_room_facility(response, portNum){
   return response;
 }
 
-//
+/**
+* Handles probelm when the unit_curreny parameter passed by api.ai is not a string.
+*
+* @function parse_price.
+* @param {Object} unit_currency Part of the JSON response passed from api.ai.
+* @return {String} unit_currency Speech response that will return to the end user.
+*/
 function parse_price(unit_currency){
   //check if unit_currency is an object
   if(typeof(unit_currency) == "object"){
@@ -407,7 +470,11 @@ function parse_price(unit_currency){
   }
   else return unit_currency;
 }
-
+/**
+* Reads data from CSV into server.
+*
+* @method parse_price.
+*/
 function read_csv(){
   //read in restaurant data
   d3.csv("/restaurant.csv", function(data) {
