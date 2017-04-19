@@ -100,6 +100,7 @@ io.on('connection', function(socket){
         'last_inquired_facility' : ""
       };
       user_data[portNum]['recommend_restaurant'] = new Set() ;
+      //current requested price range
       user_data[portNum]['restaurant_price_request'] = ['<', '1000'];
     }
     
@@ -112,7 +113,8 @@ io.on('connection', function(socket){
       //perform action if needed
       if(action.length > 0) {
         console.log("action",action);
-        sysOutput = eval_function(action, response, portNum);
+        //decide ouput by evaluating the action
+        sysOutput = eval_action(action, response, portNum);
         console.log(sysOutput)
       }
       
@@ -136,13 +138,15 @@ io.on('connection', function(socket){
 // Listening on the port
 http.listen(port, function(){
   console.log('listening on *:' + port);
-  //read db into server
+  //read db into server when ready
   read_csv();
 
 
 });
 
-function eval_function(action, response, portNum){
+
+//evalate action and determine system response
+function eval_action(action, response, portNum){
   switch(action){
     case "recommend_restaurant":
     case "recommend_another_restaurant":
@@ -167,14 +171,14 @@ function eval_function(action, response, portNum){
       response = inquire_room_facility(response, portNum);
       break;
   }   
-  console.log("eval_function");
+  
   return response
 }
 
 
-
+//basic recommend_restaurant function
 function recommend_restaurant(response, portNum){
-  //console.log(response.result);
+  //extract user request from the JSON response
   var priceRequest = "";
   var styleRequest = "";
   if( 'unit-currency' in response.result.parameters){
@@ -201,23 +205,24 @@ function recommend_restaurant(response, portNum){
   }
   console.log("priceRequest",priceRequest);
   console.log("styleRequest",styleRequest);
+
+  //initialize variables for the later loop
   var currentPrice = "";
   var currentRestaurant = "";
-  //read restaurant csv file
   
-  // console.log('styleRequest', styleRequest);
+  
+  
   restaurant_data.forEach(function(restaurant){
     var name = restaurant.name;
     var price = restaurant.price;
     var style = restaurant.style;
     var location = restaurant.location;
-    //if the restaurant has not recommended yet
+    //if the restaurant has not been recommended yet
     if(!user_data[portNum]['recommend_restaurant'].has( name )){
 
-      //we want to match the restaurant whose price is the closest to the price request
-      
+      //if the style match the style request
       if( style == user_data[portNum]['restaurant_style']){
-        
+        //if user request 
         if((parseInt(price) <= parseInt(priceRequest) &&user_data[portNum]['restaurant_price_request'][0] == '<') ||
           (parseInt(price) >= parseInt(priceRequest) &&user_data[portNum]['restaurant_price_request'][0] == '>')){
           currentRestaurant = name;
@@ -236,6 +241,7 @@ function recommend_restaurant(response, portNum){
     //might need to come up with a way to recommend user restaurant with another style
     //might need to reset context here
     console.log("No restaurant");
+    //if user did not specify restaurant style
     if(styleRequest==""){
       response = "What kind of restaurant do you like?";  
     }
@@ -259,7 +265,9 @@ function recommend_restaurant(response, portNum){
   return response;
 }
 
+//provide user information about the restaurant
 function restaurant_give_detail(response, portNum){
+  //get user's request from JSON response
   var priceRequest = parse_price(response.result.parameters['unit-currency']);
   
   restaurant_data.forEach(function(restaurant){
@@ -277,7 +285,9 @@ function restaurant_give_detail(response, portNum){
   return response;
 }
 
+//provide user price of the restaurant
 function restaurant_check_price(response, portNum){
+  //get user's request from JSON response
   var priceRequest = parse_price(user_data[portNum]['restaurant_price']);
   
   restaurant_data.forEach(function(restaurant){
@@ -294,10 +304,14 @@ function restaurant_check_price(response, portNum){
   });
   return response;
 }
+
+//request a resturant with different price range
 function restaurant_price_switch(response, portNum){
+  //get user's request from JSON response
   var priceRequest = response.result.parameters["price_request"];
   
   if( priceRequest=="lower" ){
+
     user_data[portNum]['restaurant_price_request'][0] == '<';
     //to string
     user_data[portNum]['restaurant_price_request'][1] = (parseInt(user_data[portNum]['restaurant_price']) -1) + '' ;
@@ -311,6 +325,7 @@ function restaurant_price_switch(response, portNum){
   return recommend_restaurant(response, portNum);
 }
 
+//request a resturant with different restaurant style
 function restaurant_style_switch(response, portNum){
   
   user_data[portNum]['restaurant_style'] = response.result.parameters["restaurant_style"];
@@ -318,7 +333,7 @@ function restaurant_style_switch(response, portNum){
 }
 
 
-
+//inquire about hotel facility
 function inquire_hotel_facility(response, portNum){
   //if user has already inquired a facility
   var inquiredFacility = "";
@@ -367,7 +382,7 @@ function inquire_hotel_facility(response, portNum){
   });
   return response;
 }
-
+//inquire about room facility
 function inquire_room_facility(response, portNum){
   var inquired_facility = response.result.parameters["Roomservicetype"];  
   response = "Sorry we don't have such room facility.";
@@ -383,9 +398,10 @@ function inquire_room_facility(response, portNum){
 
   return response;
 }
+
+//
 function parse_price(unit_currency){
   //check if unit_currency is an object
-  console.log("unit_currency", unit_currency.amount);
   if(typeof(unit_currency) == "object"){
     return String(unit_currency.amount);
   }
@@ -416,6 +432,7 @@ function read_csv(){
     }
    // console.log(restaurant_data);
   });
+  
   //read in room facility data
   d3.csv("/room_facility.csv", function(data) {
     if(data){
@@ -437,8 +454,8 @@ function read_csv(){
     }
    //console.log(room_facility_data);
   });
+
   //read in hotel facility data
-  
   d3.csv("/hotel_facility.csv", function(data) {
     if(data){
       
