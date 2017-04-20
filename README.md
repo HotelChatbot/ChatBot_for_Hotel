@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Intelligent ChatBot for Better Hotel Experience
 
 ## Online URL: [Hotel Chatbot](http://hotel-agent.herokuapp.com)
@@ -38,3 +39,8 @@
 1. The **blue microphone button** at the left-bottom of your browser is clickable to enable/disable speech recognizer, please click to activate the button when speaking. Feel free to disable it when the chatbot is idle.
 2. The **message textbox** at the left-middle of your browser allows text input to replace speaking if you like. It provides alternative availability for user who is under the circumstance that is not speak-convenient.
 3. The **mode button** at the left-middle of your browser is for developer to test their server availability. Please be reminded that it is not for user intention.
+=======
+#Intelligent Hotel Assistant
+##Introduction
+This project aims to build an interactive chatbot specialized in hotel services, such as answering general question about the hotel services, searching and using the service of the restaurants nearby, to name but a few.
+>>>>>>> 0b90449d3ef00a69cecc8ac675df243c23a6d8dd
