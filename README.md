@@ -7,11 +7,16 @@
 `cd ChatBot_for_Hotel`
 #### 3. Download all the dependencies
 `npm i`
+#### 4. Database Loading
+`mongod`
+
 
 ## Activation
-#### 1. Start off the server & and cheer!!
+#### 1. Activate the database(if haven't)
+`mongod`
+#### 2. Open another console and start off the server
 `nodemon server`
-#### 2. Open a browser and visit the URL
+#### 3. Open a browser and visit the URL
 `http://localhost:8080/`
 
 ## Simple tips for using
