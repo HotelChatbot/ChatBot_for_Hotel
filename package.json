@@ -1,7 +1,7 @@
 {
-  "name": "new_start",
+  "name": "hotel-chatbot",
   "version": "1.0.0",
-  "description": "",
+  "description": "The chatbot who makes you better hotel experience",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -12,12 +12,10 @@
   "dependencies": {
     "apiai": "^4.0.2",
     "body-parser": "^1.17.1",
-    "d3": "^4.7.4",
     "express": "^4.15.2",
     "http": "0.0.0",
     "mongodb": "^2.2.25",
     "mongoose": "^4.9.4",
-    "request": "^2.81.0",
     "socket.io": "^1.7.3"
   },
   "devDependencies": {

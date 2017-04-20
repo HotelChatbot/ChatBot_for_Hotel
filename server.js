@@ -4,10 +4,7 @@ var http = require('http').Server(app);
 // Base socket.io on express app
 var io = require('socket.io')(http);
 // Constanize the port number
-var port = process.env.PORT || 80;
-
-// read csv file
-var d3 = require('d3');
+var port = process.env.PORT || 8080;
 
 // Use mongoose to manipulate mongoDB
 var mongoose = require('mongoose');
@@ -32,6 +29,31 @@ if (process.env.PORT) {
   mongoose.connect(database.localUrl);
 }
 
+// Load in all the required data from Mongo Database
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'Database Connection Error:'));
+db.once('open', function() {
+  console.log("Database Ready! Connected to: " + db.name);
+
+  db.collection('restaurant').find().toArray(function(err, restaurant) {
+    read_csv(restaurant, "restaurant");
+  });
+
+  db.collection('hotel_facility').find().toArray(function(err, hotel_facility) {
+    read_csv(hotel_facility, "hotel_facility");
+  });
+
+  db.collection('room_facility').find().toArray(function(err, room_facility) {
+    read_csv(room_facility, "room_facility");
+  });
+
+  db.collection('tourist_spot').find().toArray(function(err, tourist_spot) {
+    read_csv(tourist_spot, "tourist_spot");
+  });
+  db.close();
+});
+
+
 // Initialize the front-end
 app.use(express.static("public"));
 
@@ -47,7 +69,7 @@ var user_data = {};
 var restaurant_data = [];
 var room_facility_data = [];
 var hotel_facility_data = [];
-
+var tourist_spot_data = [];
 // Build up the routers
 require('./app/routes.js')(app);
 
@@ -97,9 +119,12 @@ io.on('connection', function(socket){
       { 'restaurant_style':"",
         'restaurant_price':"",
         'restaurant_name': "",
-        'last_inquired_facility' : ""
+        'last_inquired_facility' : "",
+        'tourist_spot_name':"",
+        'tourist_spot_style':""
       };
       user_data[portNum]['recommend_restaurant'] = new Set() ;
+      user_data[portNum]['recommend_tourist_spot'] = new Set() ;
       //current requested price range
       user_data[portNum]['restaurant_price_request'] = ['<', '1000'];
     }
@@ -138,8 +163,10 @@ io.on('connection', function(socket){
 // Listening on the port
 http.listen(port, function(){
   console.log('listening on *:' + port);
-  //read db into server when ready
-  read_csv();
+
+  //read db into server
+  //read_csv();
+
 
 
 });
@@ -176,6 +203,12 @@ function eval_action(action, response, portNum){
       break;
     case "inquire_room_facility":
       response = inquire_room_facility(response, portNum);
+      break;
+    case "tourist_spot_blunt":
+      response = tourist_spot_blunt(response,portNum);
+      break;
+    case "tourist_spot_give_detail":
+      response = tourist_spot_give_detail(response, portNum);
       break;
   }   
   
@@ -455,6 +488,78 @@ function inquire_room_facility(response, portNum){
 
   return response;
 }
+function tourist_spot_blunt(response,portNum){
+  user_data[portNum]['tourist_spot_style'] = "whatever";
+  if('tourist-spot-architecture' in response.result.parameters){
+    user_data[portNum]['tourist_spot_style'] = response.result.parameters["tourist-spot-architecture"];
+  }
+  return recommend_tourist_spot(response,portNum);
+}
+function recommend_tourist_spot(response,portNum){
+  //initialize variables for the later loop
+  
+  var currentTouristSpot = "";
+  var currentDistance = "";
+  tourist_spot_data.forEach(function(tourist_spot){
+    var name = tourist_spot.name;
+    var price = tourist_spot.price;
+    var style = tourist_spot.style;
+    var distance = tourist_spot.distance;
+    //if the restaurant has not been recommended yet
+    if(!user_data[portNum]['recommend_tourist_spot'].has( name )){
+
+      //if the style match the style request
+      if(user_data[portNum]['tourist_spot_style'] == "whatever" || style == user_data[portNum]['tourist_spot_style'] ){
+        //if user request 
+        currentTouristSpot = name;
+        currentDistance = distance;
+        user_data[portNum]['tourist_spot_style'] = style;
+        user_data[portNum]['tourist_spot_name'] = name;
+      }
+    }
+  });
+  console.log()
+  //no spot found
+  if(!currentTouristSpot){
+    //might need to come up with a way to recommend user touristspot with another style
+    //might need to reset context here
+    console.log("No tourist_spot");
+    //if user did not specify restaurant style
+    
+    
+    response = "Sorry we cannot find any tourist spot that meets your criteria. What kind of tourist spot do you like";  
+    
+  }
+  else{
+    //add current restaurant to the set so that you don't duplicate recommendation
+    user_data[portNum]['recommend_tourist_spot'].add(currentTouristSpot);
+    
+    console.log(user_data);
+    //concatenate data into response
+    response = "Here is a "+ user_data[portNum]['tourist_spot_style'] + " called " + currentTouristSpot +" that is " + currentDistance +" away from you.";  
+  }
+  
+  
+  return response;
+}
+
+function tourist_spot_give_detail(response, portNum){
+  console.log(user_data[portNum]["tourist_spot_name"]);
+  tourist_spot_data.forEach(function(tourist_spot){
+    var name = tourist_spot.name;
+    var price = tourist_spot.price;
+    var style = tourist_spot.style;
+    var distance = tourist_spot.distance;
+    //if the restaurant has not been recommended yet
+    console.log(name, user_data[portNum]["tourist_spot_name"]);
+    if(name == user_data[portNum]["tourist_spot_name"]){
+      response = name + " costs around " + price + " and it is " + distance +" away from you";
+      
+    }
+  });
+  console.log("ggg");
+  return response;
+}
 
 /**
 * Handles probelm when the unit_curreny parameter passed by api.ai is not a string.
@@ -463,6 +568,7 @@ function inquire_room_facility(response, portNum){
 * @param {Object} unit_currency Part of the JSON response passed from api.ai.
 * @return {String} unit_currency Speech response that will return to the end user.
 */
+
 function parse_price(unit_currency){
   //check if unit_currency is an object
   if(typeof(unit_currency) == "object"){
@@ -470,83 +576,46 @@ function parse_price(unit_currency){
   }
   else return unit_currency;
 }
+
 /**
 * Reads data from CSV into server.
 *
 * @method read_csv
 */
-function read_csv(){
-  //read in restaurant data
-  d3.csv("/restaurant.csv", function(data) {
-    if(data){
-      //console.log(data);
-      var i=0;
-      data.forEach(function(row) {
-        var restaurant_name = row.name;
-        var restaurant_style = row.style;
-        var price = row.price;
-        var location = row.location;
-        
-        
-        restaurant = {
-          'name': restaurant_name,
-          'style': restaurant_style,
-          'price': price,
-          'location': location
-        }
-        restaurant_data.push(restaurant);    
-      });  
-    }
-    console.log(restaurant_data);
-  });
+
+function read_csv(data, collectionName){
   
-  //read in room facility data
-  d3.csv("/room_facility.csv", function(data) {
-    if(data){
-      //console.log(data);
-      var i=0;
-      data.forEach(function(row) {
-        var name = row.name;
-        var location = row.location;
-        
-        
-        
-        var facility = {
-          'name': name,
-          'location': location
-          
-        }
-        room_facility_data.push(facility);    
-      });  
-    }
-   //console.log(room_facility_data);
-  });
-
-  //read in hotel facility data
-  d3.csv("/hotel_facility.csv", function(data) {
+  if (collectionName == "restaurant") {
 
     if(data){
-      
-      
-      data.forEach(function(row) {
-        var name = row.name;
-        var location = row.location;
-        var opening_time = row.opening_time;
-        var closing_time = row.closing_time;
-        
-        
-        var facility = {
-          'name': name,
-          'location': location,
-          'opening_time': opening_time,
-          'closing_time': closing_time
+      restaurant_data = data;
           
-        }
-
-        hotel_facility_data.push(facility);    
-      });  
+    } else {
+      console.log("Empty Data Collection: " + collectionName);
     }
-   console.log(hotel_facility_data);
-  });
+
+  } else if (collectionName == "room_facility") {
+
+    if(data){
+      room_facility_data = data;
+    } else {
+      console.log("Empty Data Collection: " + collectionName);
+    }
+  } else if (collectionName == "hotel_facility") {
+    if(data){
+      hotel_facility_data = data;       
+    } else {
+      console.log("Empty Data Collection: " + collectionName);
+    }
+  } else if (collectionName == "tourist_spot") {
+    if(data){
+      tourist_spot_data = data;       
+      console.log(tourist_spot_data)
+    } else {
+      console.log("Empty Data Collection: " + collectionName);
+    }
+  }
+
+
 }
 

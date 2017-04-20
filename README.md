@@ -1,5 +1,12 @@
 # Intelligent ChatBot for Better Hotel Experience
 
+## Online URL: [Hotel Chatbot](http://hotel-agent.herokuapp.com)
+
+
+## Basic Requirement
+#### Local deployment only supported on Mac OS X, might not work for other operating systems.
+
+
 ## Installation
 #### 1. Download the project
 `git clone https://github.com/HotelChatbot/ChatBot_for_Hotel.git`
@@ -7,12 +14,24 @@
 `cd ChatBot_for_Hotel`
 #### 3. Download all the dependencies
 `npm i`
+#### 4. Open another console to activate the database(if haven't)
+`mongod`
+#### 5. Go back to original console and load the datacase documents
+```mongoimport -d hotel-chatbot -c restaurant --type csv --file restaurant.csv --headerline```
+
+```mongoimport -d hotel-chatbot -c hotel_facility --type csv --file hotel_facility.csv --headerline```
+
+```mongoimport -d hotel-chatbot -c room_facility --type csv --file room_facility.csv --headerline```
+
 
 ## Activation
-#### 1. Start off the server & and cheer!!
-`nodemon server`
-#### 2. Open a browser and visit the URL
+#### 1. Activate the database(if haven't)
+`mongod`
+#### 2. Open another console and start off the server
+`npm start`
+#### 3. Open a browser and visit the URL
 `http://localhost:8080/`
+
 
 ## Simple tips for using
 1. The **blue microphone button** at the left-bottom of your browser is clickable to enable/disable speech recognizer, please click to activate the button when speaking. Feel free to disable it when the chatbot is idle.
