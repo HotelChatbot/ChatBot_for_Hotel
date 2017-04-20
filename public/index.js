@@ -1,6 +1,6 @@
 var isConnectToDemoAgent = true; 
 
-// Page Loaded
+
 $(function() {
   $('#serverToggle').change(function() {
     isConnectToDemoAgent = this.checked;
@@ -29,9 +29,12 @@ $(function() {
 
 });
 
-
-// Display the user input and send it to api.ai and then
-// Waiting on the response to produce voice output
+/**
+* Display the user input and send it to api.ai and then
+* waiting on the response to produce voice output.
+* @method sendAndWaitToOutputAPIAIs
+* @param {String} uesrInputToSend Text input from the front end to be sent.
+*/
 function sendAndWaitToOutputAPIAI(userInputToSend){
   // Show user input
   display_speech(userInputToSend);
@@ -53,13 +56,23 @@ var sysCanOutput = false;
 // Create the socket for communication
 var socket = io();
 
-// Display the text upon the given sentence
+/**
+* Display the text upon the given sentence.
+* @method display_speechs
+* @param {String} msg Text to be displayed to the user.
+*/
 function display_speech(msg) {
   document.getElementById("display_text").innerHTML = msg;
 }
 
-// Produce voice output
-// Synthesis support. Make your web apps talk!
+
+/**
+* Produce voice output.
+* Synthesis support. Make your web apps talk!
+* @method produce_voice_output
+* @param {String} text Text to be output as sound.
+*/
+
 function produce_voice_output(text) {
   if(sysCanOutput){
     // Wait for next user speech initiative

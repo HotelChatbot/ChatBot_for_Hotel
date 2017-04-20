@@ -459,7 +459,7 @@ function inquire_room_facility(response, portNum){
 /**
 * Handles probelm when the unit_curreny parameter passed by api.ai is not a string.
 *
-* @function parse_price.
+* @function parse_price
 * @param {Object} unit_currency Part of the JSON response passed from api.ai.
 * @return {String} unit_currency Speech response that will return to the end user.
 */
@@ -473,7 +473,7 @@ function parse_price(unit_currency){
 /**
 * Reads data from CSV into server.
 *
-* @method parse_price.
+* @method read_csv
 */
 function read_csv(){
   //read in restaurant data
