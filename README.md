@@ -7,9 +7,9 @@
 `cd ChatBot_for_Hotel`
 #### 3. Download all the dependencies
 `npm i`
-#### 4. Database Loading
+#### 4. Activate the database(if haven't)
 `mongod`
-
+#### 5. Open another console and load the datacase documents
 ```mongoimport -d hotel-chatbot -c restaurant --type csv --file restaurant.csv --headerline```
 
 ```mongoimport -d hotel-chatbot -c hotel_facility --type csv --file hotel_facility.csv --headerline```
