@@ -210,6 +210,9 @@ function eval_action(action, response, portNum){
     case "tourist_spot_give_detail":
       response = tourist_spot_give_detail(response, portNum);
       break;
+    case "recomend_tourist_spot_with_type":
+      response = recomend_tourist_spot_with_type(response, portNum);
+      break;
   }   
   
   return response
@@ -488,13 +491,50 @@ function inquire_room_facility(response, portNum){
 
   return response;
 }
+
+/**
+* Recommend a tourist spot without stlye specification.
+*
+* @method tourist_spot_blunt
+* @param {String} response Speech response passed from api.ai.
+* @param {Integer} portNum Current end user's port number connecting to the server
+* @return {String} response Speech response that will return to the end user.
+*/
 function tourist_spot_blunt(response,portNum){
+  //set style to be "whatever"
   user_data[portNum]['tourist_spot_style'] = "whatever";
   if('tourist-spot-architecture' in response.result.parameters){
     user_data[portNum]['tourist_spot_style'] = response.result.parameters["tourist-spot-architecture"];
   }
   return recommend_tourist_spot(response,portNum);
 }
+
+/**
+* Recommend a tourist spot with stlye specification.
+*
+* @method recommend_tourist_spot_with_type
+* @param {String} response Speech response passed from api.ai.
+* @param {Integer} portNum Current end user's port number connecting to the server
+* @return {String} response Speech response that will return to the end user.
+*/
+function recomend_tourist_spot_with_type(response, portNum){
+
+  if('tourist-spot-architecture' in response.result.parameters){
+    //set style as the response passed by user
+    user_data[portNum]['tourist_spot_style'] = response.result.parameters["tourist-spot-architecture"];   
+  }
+  return recommend_tourist_spot(response,portNum);
+    
+}
+
+/**
+* General function for recommend a tourist spot.
+*
+* @method recommend_tourist_spot
+* @param {String} response Speech response passed from api.ai.
+* @param {Integer} portNum Current end user's port number connecting to the server
+* @return {String} response Speech response that will return to the end user.
+*/
 function recommend_tourist_spot(response,portNum){
   //initialize variables for the later loop
   
@@ -510,7 +550,7 @@ function recommend_tourist_spot(response,portNum){
 
       //if the style match the style request
       if(user_data[portNum]['tourist_spot_style'] == "whatever" || style == user_data[portNum]['tourist_spot_style'] ){
-        //if user request 
+        //store this tourist spot into the iteratoin variable
         currentTouristSpot = name;
         currentDistance = distance;
         user_data[portNum]['tourist_spot_style'] = style;
@@ -523,10 +563,8 @@ function recommend_tourist_spot(response,portNum){
   if(!currentTouristSpot){
     //might need to come up with a way to recommend user touristspot with another style
     //might need to reset context here
-    console.log("No tourist_spot");
+    console.log("No tourist spot");
     //if user did not specify restaurant style
-    
-    
     response = "Sorry we cannot find any tourist spot that meets your criteria. What kind of tourist spot do you like";  
     
   }
@@ -539,10 +577,16 @@ function recommend_tourist_spot(response,portNum){
     response = "Here is a "+ user_data[portNum]['tourist_spot_style'] + " called " + currentTouristSpot +" that is " + currentDistance +" away from you.";  
   }
   
-  
   return response;
 }
-
+/**
+* Provide user with the detail information about the tourist spot.
+*
+* @method tourist_spot_give_detail
+* @param {String} response Speech response passed from api.ai.
+* @param {Integer} portNum Current end user's port number connecting to the server
+* @return {String} response Speech response that will return to the end user.
+*/
 function tourist_spot_give_detail(response, portNum){
   console.log(user_data[portNum]["tourist_spot_name"]);
   tourist_spot_data.forEach(function(tourist_spot){
