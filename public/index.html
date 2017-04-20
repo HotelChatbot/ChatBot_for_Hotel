@@ -1,0 +1,42 @@
+<!-- Microphone testing: >> python -m SimpleHTTPServer -->
+<!doctype html>
+<html>
+  <title>DemoAgent</title>
+  <head>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/annyang/2.6.0/annyang.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/SpeechKITT/0.3.0/speechkitt.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="https://cdn.socket.io/socket.io-1.7.3.js"></script>
+
+
+    <link rel="stylesheet" type="text/css" href="style.css">
+
+  </head>
+
+  <body>
+
+    <h1>Hotel Agent</h1>
+
+    <p id="display_text">I am listening</p>
+
+    <hr/>
+
+    <h3>User Mode (Disabled if in Test Mode)</h3>
+    <label class="switch">
+      <input id="serverToggle" type="checkbox" checked>
+      <div class="slider round"></div>
+    </label>
+
+    <hr/>
+
+    <h3>Text Mode</h3>
+    Message: <input type="text" id="userText" name="userText"><br>
+    <input id="userTextButton" type="submit" value="Submit">
+
+  <script src="index.js"></script>
+
+  </body>
+</html>
+
+

@@ -1,0 +1,24 @@
+{
+  "name": "hotel-chatbot",
+  "version": "1.0.0",
+  "description": "The chatbot who makes you better hotel experience",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "apiai": "^4.0.2",
+    "body-parser": "^1.17.1",
+    "express": "^4.15.2",
+    "http": "0.0.0",
+    "mongodb": "^2.2.25",
+    "mongoose": "^4.9.4",
+    "socket.io": "^1.7.3"
+  },
+  "devDependencies": {
+    "nodemon": "^1.11.0"
+  }
+}
