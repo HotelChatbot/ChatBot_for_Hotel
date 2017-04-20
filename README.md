@@ -1,6 +1,6 @@
 # Intelligent ChatBot for Better Hotel Experience
 
-## Online URL: [Hotel Chatbot](hotel-agent.herokuapp.com)
+## Online URL: [Hotel Chatbot](http://hotel-agent.herokuapp.com)
 
 
 ## Basic Requirement
