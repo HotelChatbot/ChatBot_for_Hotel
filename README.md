@@ -4,7 +4,7 @@
 
 
 ## Basic Requirement
-#### Local deployment only supported on **Mac OS X**, might not work for other operating systems.
+#### Local deployment only supported on Mac OS X, might not work for other operating systems.
 
 
 ## Installation
