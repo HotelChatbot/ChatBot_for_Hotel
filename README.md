@@ -10,6 +10,11 @@
 #### 4. Database Loading
 `mongod`
 
+```mongoimport -d hotel-chatbot -c restaurant --type csv --file restaurant.csv --headerline```
+
+```mongoimport -d hotel-chatbot -c hotel_facility --type csv --file hotel_facility.csv --headerline```
+
+```mongoimport -d hotel-chatbot -c room_facility --type csv --file room_facility.csv --headerline```
 
 ## Activation
 #### 1. Activate the database(if haven't)
