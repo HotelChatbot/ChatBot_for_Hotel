@@ -23,6 +23,7 @@
 
 ```mongoimport -d hotel-chatbot -c room_facility --type csv --file public/room_facility.csv --headerline```
 
+```mongoimport -d hotel-chatbot -c tourist_spot --type csv --file public/tourist_spot.csv --headerline```
 
 ## Activation
 #### 1. Activate the database(if haven't)
