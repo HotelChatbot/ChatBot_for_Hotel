@@ -10,15 +10,15 @@ module.exports = mongoose.model('Restaurant', {
     type: String,
     default: ''
   },
-  price: {
-    type: String,
-    default: ''
-  },
   location: {
     type: String,
     default: ''
   },
-  style: {
+  opening_time: {
+    type: String,
+    default: ''
+  },
+  closing_time: {
     type: String,
     default: ''
   }

@@ -6,9 +6,6 @@ var io = require('socket.io')(http);
 // Constanize the port number
 var port = process.env.PORT || 8080;
 
-// read csv file
-var d3 = require('d3');
-
 // Use mongoose to manipulate mongoDB
 var mongoose = require('mongoose');
 // Load the database config
@@ -31,6 +28,28 @@ if (process.env.PORT) {
 } else {
   mongoose.connect(database.localUrl);
 }
+
+// Load in all the required data from Mongo Database
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'Database Connection Error:'));
+db.once('open', function() {
+  console.log("Database Ready! Connected to: " + db.name);
+
+  db.collection('restaurant').find().toArray(function(err, restaurant) {
+    read_csv(restaurant, "restaurant");
+  });
+
+  db.collection('hotel_facility').find().toArray(function(err, hotel_facility) {
+    read_csv(hotel_facility, "hotel_facility");
+  });
+
+  db.collection('room_facility').find().toArray(function(err, room_facility) {
+    read_csv(room_facility, "room_facility");
+  });
+
+  db.close();
+});
+
 
 // Initialize the front-end
 app.use(express.static("public"));
@@ -137,7 +156,7 @@ io.on('connection', function(socket){
 http.listen(port, function(){
   console.log('listening on *:' + port);
   //read db into server
-  read_csv();
+  //read_csv();
 
 
 });
@@ -383,6 +402,7 @@ function inquire_room_facility(response, portNum){
 
   return response;
 }
+
 function parse_price(unit_currency){
   //check if unit_currency is an object
   console.log("unit_currency", unit_currency.amount);
@@ -392,76 +412,27 @@ function parse_price(unit_currency){
   else return unit_currency;
 }
 
-function read_csv(){
-  //read in restaurant data
-  d3.csv("/public/restaurant.csv", function(data) {
-    if(data){
-      //console.log(data);
-      var i=0;
-      data.forEach(function(row) {
-        var restaurant_name = row.name;
-        var restaurant_style = row.style;
-        var price = row.price;
-        var location = row.location;
-        
-        
-        restaurant = {
-          'name': restaurant_name,
-          'style': restaurant_style,
-          'price': price,
-          'location': location
-        }
-        restaurant_data.push(restaurant);    
-      });  
-    }
-   // console.log(restaurant_data);
-  });
-  //read in room facility data
-  d3.csv("/public/room_facility.csv", function(data) {
-    if(data){
-      //console.log(data);
-      var i=0;
-      data.forEach(function(row) {
-        var name = row.name;
-        var location = row.location;
-        
-        
-        
-        var facility = {
-          'name': name,
-          'location': location
-          
-        }
-        room_facility_data.push(facility);    
-      });  
-    }
-   //console.log(room_facility_data);
-  });
-  //read in hotel facility data
+function read_csv(data, collectionName){
   
-  d3.csv("/public/hotel_facility.csv", function(data) {
+  if (collectionName == "restaurant") {
     if(data){
-      
-      
-      data.forEach(function(row) {
-        var name = row.name;
-        var location = row.location;
-        var opening_time = row.opening_time;
-        var closing_time = row.closing_time;
-        
-        
-        var facility = {
-          'name': name,
-          'location': location,
-          'opening_time': opening_time,
-          'closing_time': closing_time
-          
-        }
-
-        hotel_facility_data.push(facility);    
-      });  
+      restaurant_data = data;
+    } else {
+      console.log("Empty Data Collection: " + collectionName);
     }
-   console.log(hotel_facility_data);
-  });
+  } else if (collectionName == "room_facility") {
+    if(data){
+      room_facility_data = data;
+    } else {
+      console.log("Empty Data Collection: " + collectionName);
+    }
+  } else if (collectionName == "hotel_facility") {
+    if(data){
+      hotel_facility_data = data;
+    } else {
+      console.log("Empty Data Collection: " + collectionName);
+    }
+  }
+
 }
 
