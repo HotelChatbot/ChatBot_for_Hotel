@@ -1,0 +1,10 @@
+name,price,distance,style
+TS9,50,300 meters,nightLife
+TS8,100,5009 meters,sports
+TS7,150,5008 meters,shopping
+TS6,200,5007 meters,nature
+TS5,250,5006 meters,park
+TS4,300,5005 meters,museum
+TS3,350,5003 meters,hiking
+TS2,400,5000 meters,art
+TS1,1000,5001 meters,architecture

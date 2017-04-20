@@ -47,6 +47,9 @@ db.once('open', function() {
     read_csv(room_facility, "room_facility");
   });
 
+  db.collection('tourist_spot').find().toArray(function(err, tourist_spot) {
+    read_csv(tourist_spot, "tourist_spot");
+  });
   db.close();
 });
 
@@ -66,7 +69,7 @@ var user_data = {};
 var restaurant_data = [];
 var room_facility_data = [];
 var hotel_facility_data = [];
-
+var tourist_spot_data = [];
 // Build up the routers
 require('./app/routes.js')(app);
 
@@ -116,9 +119,13 @@ io.on('connection', function(socket){
       { 'restaurant_style':"",
         'restaurant_price':"",
         'restaurant_name': "",
-        'last_inquired_facility' : ""
+        'last_inquired_facility' : "",
+        'tourist_spot_name':"",
+        'tourist_spot_style':""
       };
       user_data[portNum]['recommend_restaurant'] = new Set() ;
+      user_data[portNum]['recommend_tourist_spot'] = new Set() ;
+      //current requested price range
       user_data[portNum]['restaurant_price_request'] = ['<', '1000'];
     }
     
@@ -131,7 +138,8 @@ io.on('connection', function(socket){
       //perform action if needed
       if(action.length > 0) {
         console.log("action",action);
-        sysOutput = eval_function(action, response, portNum);
+        //decide ouput by evaluating the action
+        sysOutput = eval_action(action, response, portNum);
         console.log(sysOutput)
       }
       
@@ -155,13 +163,24 @@ io.on('connection', function(socket){
 // Listening on the port
 http.listen(port, function(){
   console.log('listening on *:' + port);
+
   //read db into server
   //read_csv();
 
 
+
 });
 
-function eval_function(action, response, portNum){
+/**
+* Evaluate function passed by api.ai.
+*
+* @method eval_action
+* @param {String} action Action passed from api.ai.
+* @param {String} response Speech response passed from api.ai.
+* @param {Integer} portNum Current end user's port number connecting to the server
+* @return {String} response Speech response that will return to the end user.
+*/
+function eval_action(action, response, portNum){
   switch(action){
     case "recommend_restaurant":
     case "recommend_another_restaurant":
@@ -185,15 +204,31 @@ function eval_function(action, response, portNum){
     case "inquire_room_facility":
       response = inquire_room_facility(response, portNum);
       break;
+    case "tourist_spot_blunt":
+      response = tourist_spot_blunt(response,portNum);
+      break;
+    case "tourist_spot_give_detail":
+      response = tourist_spot_give_detail(response, portNum);
+      break;
+    case "recomend_tourist_spot_with_type":
+      response = recomend_tourist_spot_with_type(response, portNum);
+      break;
   }   
-  console.log("eval_function");
+  
   return response
 }
 
 
-
+/**
+* Basic recommend restaurant function.
+*
+* @method recommend_restaurant
+* @param {String} response Speech response passed from api.ai.
+* @param {Integer} portNum Current end user's port number connecting to the server
+* @return {String} response Speech response that will return to the end user.
+*/
 function recommend_restaurant(response, portNum){
-  //console.log(response.result);
+  //extract user request from the JSON response
   var priceRequest = "";
   var styleRequest = "";
   if( 'unit-currency' in response.result.parameters){
@@ -220,23 +255,24 @@ function recommend_restaurant(response, portNum){
   }
   console.log("priceRequest",priceRequest);
   console.log("styleRequest",styleRequest);
+
+  //initialize variables for the later loop
   var currentPrice = "";
   var currentRestaurant = "";
-  //read restaurant csv file
   
-  // console.log('styleRequest', styleRequest);
+  
+  
   restaurant_data.forEach(function(restaurant){
     var name = restaurant.name;
     var price = restaurant.price;
     var style = restaurant.style;
     var location = restaurant.location;
-    //if the restaurant has not recommended yet
+    //if the restaurant has not been recommended yet
     if(!user_data[portNum]['recommend_restaurant'].has( name )){
 
-      //we want to match the restaurant whose price is the closest to the price request
-      
+      //if the style match the style request
       if( style == user_data[portNum]['restaurant_style']){
-        
+        //if user request 
         if((parseInt(price) <= parseInt(priceRequest) &&user_data[portNum]['restaurant_price_request'][0] == '<') ||
           (parseInt(price) >= parseInt(priceRequest) &&user_data[portNum]['restaurant_price_request'][0] == '>')){
           currentRestaurant = name;
@@ -255,6 +291,7 @@ function recommend_restaurant(response, portNum){
     //might need to come up with a way to recommend user restaurant with another style
     //might need to reset context here
     console.log("No restaurant");
+    //if user did not specify restaurant style
     if(styleRequest==""){
       response = "What kind of restaurant do you like?";  
     }
@@ -278,7 +315,16 @@ function recommend_restaurant(response, portNum){
   return response;
 }
 
+/**
+* Provide user information about the restaurant.
+*
+* @method restaurant_give_detail
+* @param {String} response Speech response passed from api.ai.
+* @param {Integer} portNum Current end user's port number connecting to the server
+* @return {String} response Speech response that will return to the end user.
+*/
 function restaurant_give_detail(response, portNum){
+  //get user's request from JSON response
   var priceRequest = parse_price(response.result.parameters['unit-currency']);
   
   restaurant_data.forEach(function(restaurant){
@@ -296,7 +342,16 @@ function restaurant_give_detail(response, portNum){
   return response;
 }
 
+/**
+* Provide user price of the restaurant.
+*
+* @method restaurant_check_price
+* @param {String} response Speech response passed from api.ai.
+* @param {Integer} portNum Current end user's port number connecting to the server
+* @return {String} response Speech response that will return to the end user.
+*/
 function restaurant_check_price(response, portNum){
+  //get user's request from JSON response
   var priceRequest = parse_price(user_data[portNum]['restaurant_price']);
   
   restaurant_data.forEach(function(restaurant){
@@ -313,10 +368,21 @@ function restaurant_check_price(response, portNum){
   });
   return response;
 }
+
+/**
+* Request a resturant with different price range.
+*
+* @method restaurant_price_switch
+* @param {String} response Speech response passed from api.ai.
+* @param {Integer} portNum Current end user's port number connecting to the server
+* @return {String} response Speech response that will return to the end user.
+*/
 function restaurant_price_switch(response, portNum){
+  //get user's request from JSON response
   var priceRequest = response.result.parameters["price_request"];
   
   if( priceRequest=="lower" ){
+
     user_data[portNum]['restaurant_price_request'][0] == '<';
     //to string
     user_data[portNum]['restaurant_price_request'][1] = (parseInt(user_data[portNum]['restaurant_price']) -1) + '' ;
@@ -330,6 +396,14 @@ function restaurant_price_switch(response, portNum){
   return recommend_restaurant(response, portNum);
 }
 
+/**
+* Request a resturant with different restaurant style.
+*
+* @method restaurant_style_switch
+* @param {String} response Speech response passed from api.ai.
+* @param {Integer} portNum Current end user's port number connecting to the server
+* @return {String} response Speech response that will return to the end user.
+*/
 function restaurant_style_switch(response, portNum){
   
   user_data[portNum]['restaurant_style'] = response.result.parameters["restaurant_style"];
@@ -337,7 +411,14 @@ function restaurant_style_switch(response, portNum){
 }
 
 
-
+/**
+* Inquire about hotel facility.
+*
+* @method inquire_hotel_facility
+* @param {String} response Speech response passed from api.ai.
+* @param {Integer} portNum Current end user's port number connecting to the server
+* @return {String} response Speech response that will return to the end user.
+*/
 function inquire_hotel_facility(response, portNum){
   //if user has already inquired a facility
   var inquiredFacility = "";
@@ -387,6 +468,14 @@ function inquire_hotel_facility(response, portNum){
   return response;
 }
 
+/**
+* Inquire about room facility.
+*
+* @method inquire_room_facility
+* @param {String} response Speech response passed from api.ai.
+* @param {Integer} portNum Current end user's port number connecting to the server
+* @return {String} response Speech response that will return to the end user.
+*/
 function inquire_room_facility(response, portNum){
   var inquired_facility = response.result.parameters["Roomservicetype"];  
   response = "Sorry we don't have such room facility.";
@@ -403,24 +492,154 @@ function inquire_room_facility(response, portNum){
   return response;
 }
 
+/**
+* Recommend a tourist spot without stlye specification.
+*
+* @method tourist_spot_blunt
+* @param {String} response Speech response passed from api.ai.
+* @param {Integer} portNum Current end user's port number connecting to the server
+* @return {String} response Speech response that will return to the end user.
+*/
+function tourist_spot_blunt(response,portNum){
+  //set style to be "whatever"
+  user_data[portNum]['tourist_spot_style'] = "whatever";
+  if('tourist-spot-architecture' in response.result.parameters){
+    user_data[portNum]['tourist_spot_style'] = response.result.parameters["tourist-spot-architecture"];
+  }
+  return recommend_tourist_spot(response,portNum);
+}
+
+/**
+* Recommend a tourist spot with stlye specification.
+*
+* @method recommend_tourist_spot_with_type
+* @param {String} response Speech response passed from api.ai.
+* @param {Integer} portNum Current end user's port number connecting to the server
+* @return {String} response Speech response that will return to the end user.
+*/
+function recomend_tourist_spot_with_type(response, portNum){
+
+  if('tourist-spot-architecture' in response.result.parameters){
+    //set style as the response passed by user
+    user_data[portNum]['tourist_spot_style'] = response.result.parameters["tourist-spot-architecture"];   
+  }
+  return recommend_tourist_spot(response,portNum);
+    
+}
+
+/**
+* General function for recommend a tourist spot.
+*
+* @method recommend_tourist_spot
+* @param {String} response Speech response passed from api.ai.
+* @param {Integer} portNum Current end user's port number connecting to the server
+* @return {String} response Speech response that will return to the end user.
+*/
+function recommend_tourist_spot(response,portNum){
+  //initialize variables for the later loop
+  
+  var currentTouristSpot = "";
+  var currentDistance = "";
+  tourist_spot_data.forEach(function(tourist_spot){
+    var name = tourist_spot.name;
+    var price = tourist_spot.price;
+    var style = tourist_spot.style;
+    var distance = tourist_spot.distance;
+    //if the restaurant has not been recommended yet
+    if(!user_data[portNum]['recommend_tourist_spot'].has( name )){
+
+      //if the style match the style request
+      if(user_data[portNum]['tourist_spot_style'] == "whatever" || style == user_data[portNum]['tourist_spot_style'] ){
+        //store this tourist spot into the iteratoin variable
+        currentTouristSpot = name;
+        currentDistance = distance;
+        user_data[portNum]['tourist_spot_style'] = style;
+        user_data[portNum]['tourist_spot_name'] = name;
+      }
+    }
+  });
+  console.log()
+  //no spot found
+  if(!currentTouristSpot){
+    //might need to come up with a way to recommend user touristspot with another style
+    //might need to reset context here
+    console.log("No tourist spot");
+    //if user did not specify restaurant style
+    response = "Sorry we cannot find any tourist spot that meets your criteria. What kind of tourist spot do you like";  
+    
+  }
+  else{
+    //add current restaurant to the set so that you don't duplicate recommendation
+    user_data[portNum]['recommend_tourist_spot'].add(currentTouristSpot);
+    
+    console.log(user_data);
+    //concatenate data into response
+    response = "Here is a "+ user_data[portNum]['tourist_spot_style'] + " called " + currentTouristSpot +" that is " + currentDistance +" away from you.";  
+  }
+  
+  return response;
+}
+/**
+* Provide user with the detail information about the tourist spot.
+*
+* @method tourist_spot_give_detail
+* @param {String} response Speech response passed from api.ai.
+* @param {Integer} portNum Current end user's port number connecting to the server
+* @return {String} response Speech response that will return to the end user.
+*/
+function tourist_spot_give_detail(response, portNum){
+  console.log(user_data[portNum]["tourist_spot_name"]);
+  tourist_spot_data.forEach(function(tourist_spot){
+    var name = tourist_spot.name;
+    var price = tourist_spot.price;
+    var style = tourist_spot.style;
+    var distance = tourist_spot.distance;
+    //if the restaurant has not been recommended yet
+    console.log(name, user_data[portNum]["tourist_spot_name"]);
+    if(name == user_data[portNum]["tourist_spot_name"]){
+      response = name + " costs around " + price + " and it is " + distance +" away from you";
+      
+    }
+  });
+  console.log("ggg");
+  return response;
+}
+
+/**
+* Handles probelm when the unit_curreny parameter passed by api.ai is not a string.
+*
+* @function parse_price
+* @param {Object} unit_currency Part of the JSON response passed from api.ai.
+* @return {String} unit_currency Speech response that will return to the end user.
+*/
+
 function parse_price(unit_currency){
   //check if unit_currency is an object
-  console.log("unit_currency", unit_currency.amount);
   if(typeof(unit_currency) == "object"){
     return String(unit_currency.amount);
   }
   else return unit_currency;
 }
 
+/**
+* Reads data from CSV into server.
+*
+* @method read_csv
+*/
+
 function read_csv(data, collectionName){
   
   if (collectionName == "restaurant") {
+
     if(data){
       restaurant_data = data;
+          
     } else {
       console.log("Empty Data Collection: " + collectionName);
     }
+
   } else if (collectionName == "room_facility") {
+
     if(data){
       room_facility_data = data;
     } else {
@@ -428,11 +647,19 @@ function read_csv(data, collectionName){
     }
   } else if (collectionName == "hotel_facility") {
     if(data){
-      hotel_facility_data = data;
+      hotel_facility_data = data;       
+    } else {
+      console.log("Empty Data Collection: " + collectionName);
+    }
+  } else if (collectionName == "tourist_spot") {
+    if(data){
+      tourist_spot_data = data;       
+      console.log(tourist_spot_data)
     } else {
       console.log("Empty Data Collection: " + collectionName);
     }
   }
+
 
 }
 

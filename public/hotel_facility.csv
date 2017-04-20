@@ -1,5 +1,5 @@
 name,location,opening_time,closing_time
-gym,at the drawer,9 AM,9 PM
-restaurant,under the desk,11 AM,9 PM
-swimming pool,by the TV,10 AM,11 PM
-bar,bar_location,9 PM,10 AM
+gym,on the fourth floor,9 AM,9 PM
+restaurant,on the first floor,11 AM,9 PM
+swimming pool,on the second floor,10 AM,11 PM
+bar,on the third floor,9 PM,10 AM
