@@ -433,7 +433,10 @@ function inquire_hotel_facility(response, portNum){
   if("hotel_facility_close_open" in response.result.parameters){
     closeOrOpen = response.result.parameters["hotel_facility_close_open"];  
   }
-  
+  //user did not specify facility at all
+  if(inquiredFacility.length==0){
+    return "Which facility are you asking?";
+  }
   var inquiredLocation= "";
   var inquiredTime = "";
   
