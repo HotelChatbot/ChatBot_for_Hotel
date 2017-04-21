@@ -56,4 +56,23 @@ input:checked + .slider:before {
 
 }
 
+#userText {
+  width: 400px;
+}
 
+#userText
+{
+  background: no-repeat 10px 6px #fff;
+  color: #333;
+  width: 200px;
+  padding: 6px 6px 6px 6px;
+  border-radius: 20px;
+  box-shadow: 0 1px 0 #ccc inset;
+  transition:500ms all ease;
+  font-size: 15px;
+}
+
+#userText:hover, #userText:focus
+{
+  width: 400px;
+}
