@@ -1,5 +1,5 @@
 var isConnectToDemoAgent = true; 
-
+var shouldSystemPrompt = true;
 
 $(function() {
   $('#serverToggle').change(function() {
@@ -112,7 +112,10 @@ if (annyang) {
 
   // Start listening
   annyang.start();
-
+  if(shouldSystemPrompt){
+    userInput = "Ivana is fat.";
+    sendAndWaitToOutputAPIAI(userInput);
+  }
 } else {
   socket.emit("annyang", "Speech Recognition is closed");
 }

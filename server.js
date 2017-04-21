@@ -423,7 +423,7 @@ function inquire_hotel_facility(response, portNum){
   //if user has already inquired a facility
   var inquiredFacility = "";
   var closeOrOpen = "";
-  if(user_data[portNum]["last_inquired_facility"].length &&user_data[portNum]["last_inquired_facility"].length > 0){
+  if(response.result.parameters["hotel_facility"].length==0 &&user_data[portNum]["last_inquired_facility"].length > 0){
     inquiredFacility =  user_data[portNum]["last_inquired_facility"];
   }
   else{
@@ -433,7 +433,10 @@ function inquire_hotel_facility(response, portNum){
   if("hotel_facility_close_open" in response.result.parameters){
     closeOrOpen = response.result.parameters["hotel_facility_close_open"];  
   }
-  
+  //user did not specify facility at all
+  if(inquiredFacility.length==0){
+    return "Which facility are you asking?";
+  }
   var inquiredLocation= "";
   var inquiredTime = "";
   
@@ -463,8 +466,10 @@ function inquire_hotel_facility(response, portNum){
       else{
         response = name + " is "+ location;
       }
+      user_data[portNum]["last_inquired_facility"] = name;
     }
   });
+  console.log(user_data);
   return response;
 }
 
