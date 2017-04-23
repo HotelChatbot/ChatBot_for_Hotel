@@ -335,7 +335,7 @@ function restaurant_give_detail(response, portNum){
     //if the restaurant has not recommended yet
     if(name == user_data[portNum]['restaurant_name']){
 
-        response = "the restaurant is located at " + location + "and it costs you around "+ price;
+        response = "the restaurant is located at " + location + " and it costs you around "+ price;
     }   
     
   });
