@@ -1,6 +1,6 @@
 # Intelligent ChatBot for Better Hotel Experience
 
-## Online URL: [Hotel Chatbot](http://hotel-agent.herokuapp.com)
+### Online URL: [Hotel Chatbot](http://hotel-agent.herokuapp.com)
 
 
 ## Basic Requirement
@@ -25,6 +25,7 @@
 
 ```mongoimport -d hotel-chatbot -c tourist_spot --type csv --file public/tourist_spot.csv --headerline```
 
+
 ## Activation
 #### 1. Activate the database(if haven't)
 `mongod`
@@ -32,6 +33,10 @@
 `npm start`
 #### 3. Open a browser and visit the URL
 `http://localhost:8080/`
+
+
+## Technical Documents
+There are two sets of technical document. One is located at ```out/index.html```, and the other locates at ```public/out/index.html```
 
 
 ## Simple tips for using

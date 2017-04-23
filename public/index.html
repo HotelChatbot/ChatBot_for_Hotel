@@ -20,19 +20,27 @@
 
     <p id="display_text">I am listening</p>
 
+    <!--
     <hr/>
-
+    
     <h3>User Mode (Disabled if in Test Mode)</h3>
     <label class="switch">
       <input id="serverToggle" type="checkbox" checked>
       <div class="slider round"></div>
     </label>
+    -->
+
+    <!--<h3>Text Mode</h3>-->
+    <b>Message:</b> <input type="text" id="userText" name="userText"><br>
+    <input class="bluebutton button" id="userTextButton" type="submit" value="Submit">
 
     <hr/>
 
-    <h3>Text Mode</h3>
-    Message: <input type="text" id="userText" name="userText"><br>
-    <input class="bluebutton button" id="userTextButton" type="submit" value="Submit">
+    <h4>Technical Documents</h4>
+    <ul>
+      <li><a href="out_backend/global.html#main">Backend technical document</a></li>
+      <li><a href="out_frontend/global.html#main">Frontend and embedded API technical</a></li>
+    </ul>
 
   <script src="index.js"></script>
 
