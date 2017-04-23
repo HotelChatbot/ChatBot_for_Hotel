@@ -1,10 +1,41 @@
 name,price,distance,style
-TS9,50,300 meters,nightLife
-TS8,100,5009 meters,sports
-TS7,150,5008 meters,shopping
-TS6,200,5007 meters,nature
-TS5,250,5006 meters,park
-TS4,300,5005 meters,museum
-TS3,350,5003 meters,hiking
-TS2,400,5000 meters,art
-TS1,1000,5001 meters,architecture
+Jar Jar Bars,100,2 kilometers,nightLife
+Home Running Baseball Park,0,3000 meters,sports
+playgrounds,0,500 meters,sports
+Hoopy Basketball Court,0,500 meters,sports
+Sith Bar,200,1000 meters,nightLife
+City Sports Hall,0,500 meters,sports
+Crazy Dancing Nightclub,250,1500 meters,nightLife
+Grand Mall,0,1 kilometer,shopping
+Messy's,0,3 kilometers,shopping
+Wallet Killer,0,2 kilometers,shopping
+Skywalker Supermarket,0,300 meters,shopping
+Grand Canal,0,3 kilometers,nature
+Heehey River,0,4 kilometers,nature
+Mount Snowy,0,8 kilometers,nature
+Mount Scary,0,11 kilometers,nature
+Purple Forest,0,5 kilometers,nature
+Silver Botanical Garden,10,6 kilometers,nature
+Grassy Park,0,1500 meters,nature
+Fun Amusement Park,300,7 kilometers,park
+Dry Water Park,250,6 kilometers,park
+Howitzer Artillery Technology Park,30,900 meters,museum
+Doctor Science Museum,20,2 kilometers,museum
+Bonaparte Historical Museum,50,4 kilometers,museum
+The Great War Warfare Museum,20,3 kilometers,museum
+Healthie Hiking Trail Section One,0,4 kilometers,hiking
+Healthie Hiking Trail Section Two hundred and twenty nine,0,6 kilometers,hiking
+Healthie Hiking Trail Section Seven,0,10 kilometers,hiking
+Fascinati Gallery,10,500 meters,art
+Black and White Art Museum,20,2 kilometers,art
+Castle of Verdun,10,4 kilometers,architecture
+Grand Church,0,1000 meters,architecture
+Buddist Temple,0,2 kilometers,architecture
+Grand Mosque,0,3 kilometers,architecture
+Antique Theater,30,2 kilometers,architecture
+Laarggest Theater,0,4 kilometers,architecture
+Still Water Bridge,0,5 kilometers,architecture
+Deefensiva Fortress,20,7 kilometers,architecture
+King's Palace,50,4 kilometers,architecture
+Rebellion Square,0,5 kilometers,architecture
+A Ben Domed Train Station,0,15 kilometers,architecture
