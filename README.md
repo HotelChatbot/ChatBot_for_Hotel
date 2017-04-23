@@ -36,7 +36,7 @@
 
 
 ## Technical Documents
-There are two sets of technical document. One is located at ```out/index.html```, and the other locates at ```public/out/index.html```
+There are two sets of technical document, which are located at ```public/out_backend/global.html``` and ```public/out_frontend/global.html```
 
 
 ## Simple tips for using

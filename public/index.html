@@ -1,8 +1,13 @@
 <!-- Microphone testing: >> python -m SimpleHTTPServer -->
 <!doctype html>
-<html>
-  <title>DemoAgent</title>
+<html lang="en">
+  
   <head>
+    <title>DemoAgent</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/annyang/2.6.0/annyang.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/SpeechKITT/0.3.0/speechkitt.min.js"></script>
@@ -16,31 +21,86 @@
 
   <body>
 
-    <h1>Hotel Agent</h1>
+  <!--
+    <div class="container-fluid">
 
-    <p id="display_text">I am listening</p>
+      <h1>Hotel Agent</h1>
+      <label for="display_text">Chatbot Speech:</label>
+      <p id="display_text">I am listening</p>
 
-    <!--
-    <hr/>
+      <div class="row">
+
+
+        <div class="col-sm-5">-->
+
+          <!-- <hr/>
+          <h3>User Mode (Disabled if in Test Mode)</h3>
+          <label class="switch">
+            <input id="serverToggle" type="checkbox" checked>
+            <div class="slider round"></div>
+          </label> -->
+          <!--<h3>Text Mode</h3>-->
+          <!--
+          <b>Your Input:</b> <input type="text" id="userText" name="userText"><br>
+          <input class="bluebutton button" id="userTextButton" type="submit" value="Submit">
+
+        </div>
+
+        <div class="col-sm-7">
+          
+        </div>
+
+      </div>
+      -->
+
     
-    <h3>User Mode (Disabled if in Test Mode)</h3>
-    <label class="switch">
-      <input id="serverToggle" type="checkbox" checked>
-      <div class="slider round"></div>
-    </label>
-    -->
+    <div class="chat_window">
+      <div class="top_menu">
+        <div class="title">Hotel Agent</div>
+      </div>
 
-    <!--<h3>Text Mode</h3>-->
-    <b>Message:</b> <input type="text" id="userText" name="userText"><br>
-    <input class="bluebutton button" id="userTextButton" type="submit" value="Submit">
+      <ul class="messages"></ul>
+      
+      <div class="bottom_wrapper clearfix">
+        <div class="message_input_wrapper">
+          <input class="message_input" placeholder="Type your message here..." />
+        </div>
+        <div class="send_message">
+          <div class="icon"></div>
+          <div class="text">Send</div>
+        </div>
+      </div>
+      
 
-    <hr/>
+    </div>
 
-    <h4>Technical Documents</h4>
-    <ul>
-      <li><a href="out_backend/global.html#main">Backend technical document</a></li>
-      <li><a href="out_frontend/global.html#main">Frontend and embedded API technical</a></li>
-    </ul>
+    <!-- MUST: template for history logging -->
+    <div class="message_template">
+      <li class="message">
+        <div class="avatar"></div>
+        <div class="text_wrapper">
+          <div class="text"></div>
+        </div>
+      </li>
+    </div>
+
+
+
+
+      <div class="footer navbar-fixed-top" style="left:60%;">
+      <!--
+        <h4>Technical Documents</h4>
+        <ul>
+          <li><a href="out_backend/global.html#main">Backend technical document</a></li>
+          <li><a href="out_frontend/global.html#main">Frontend and embedded API technical document</a></li>
+        </ul>
+        -->
+        <input type="button" class="btn btn-info" onclick="location.href='out_backend/global.html#main';" value="Technical Document: Backend" />
+        <input type="button" class="btn btn-warning" onclick="location.href='out_frontend/global.html#main';" value="Technical Document: Frontend and embedded APIs" />
+      </div>
+      
+
+    </div>
 
   <script src="index.js"></script>
 
