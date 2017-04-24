@@ -89,10 +89,11 @@ $(function() {
   * @method sendAndWaitToOutputAPIAIs
   * @param {String} uesrInputToSend Text input from the front end to be sent.
   */
-  function sendAndWaitToOutputAPIAI(userInputToSend){
+  function sendAndWaitToOutputAPIAI(userInputToSend, toShow = true){
     // Show user input
     //display_speech(userInputToSend);
-    sendMessage(userInputToSend, 'right');
+    if(toShow)
+      sendMessage(userInputToSend, 'right');
 
     // Notify the server to send api.ai this input
     socket.emit("send_to_apiai", [userInputToSend, isConnectToDemoAgent]);
@@ -122,7 +123,6 @@ $(function() {
   * @method produce_voice_output
   * @param {String} text Text to be output as sound.
   */
-
   function produce_voice_output(text) {
     if(sysCanOutput){
       // Wait for next user speech initiative
@@ -139,45 +139,45 @@ $(function() {
     }
   }
 
-}); // The end of jQuery onLoad()
 
 
+  // Stop the synthesisor from speaking without user initiative
+  var sysCanOutput = false;
+
+  // Create the socket for communication
+  var socket = io();
 
 
-// Stop the synthesisor from speaking without user initiative
-var sysCanOutput = false;
+  // The speech recognition part
+  if (annyang) {
 
-// Create the socket for communication
-var socket = io();
-
-
-// The speech recognition part
-if (annyang) {
-
-  // Tell KITT to use annyang
-  SpeechKITT.annyang();
-  // Define a stylesheet for KITT to use
-  SpeechKITT.setStylesheet('//cdnjs.cloudflare.com/ajax/libs/SpeechKITT/0.3.0/themes/flat.css');
-  // Render KITT's interface
-  SpeechKITT.vroom();
+    // Tell KITT to use annyang
+    SpeechKITT.annyang();
+    // Define a stylesheet for KITT to use
+    SpeechKITT.setStylesheet('//cdnjs.cloudflare.com/ajax/libs/SpeechKITT/0.3.0/themes/flat.css');
+    // Render KITT's interface
+    SpeechKITT.vroom();
 
 
-  // Notify the server that speech recognition is ready
-  socket.emit("annyang", "Speech Recognition is ready");
+    // Notify the server that speech recognition is ready
+    socket.emit("annyang", "Speech Recognition is ready");
 
-  // Display the user input
-  annyang.addCallback('result', function(userSaid) {
-    // Catch the highest possible input from user
-    var userInput = userSaid[0];
-    sendAndWaitToOutputAPIAI(userInput);
-  });
+    // Display the user input
+    annyang.addCallback('result', function(userSaid) {
+      // Catch the highest possible input from user
+      var userInput = userSaid[0];
+      sendAndWaitToOutputAPIAI(userInput);
+    });
 
-  // Start listening
-  annyang.start();
-  if(shouldSystemPrompt){
-    userInput = "Ivana is fat.";
-    sendAndWaitToOutputAPIAI(userInput);
+    // Start listening
+    annyang.start();
+    if(shouldSystemPrompt){
+      userInput = "Ivana is fat.";
+      sendAndWaitToOutputAPIAI(userInput, false);
+    }
+  } else {
+    socket.emit("annyang", "Speech Recognition is closed");
   }
-} else {
-  socket.emit("annyang", "Speech Recognition is closed");
-}
+
+
+}); // The end of jQuery onLoad()
