@@ -163,13 +163,8 @@ io.on('connection', function(socket){
 // Listening on the port
 http.listen(port, function(){
   console.log('listening on *:' + port);
-
-  //read db into server
-  //read_csv();
-
-
-
 });
+
 
 /**
 * Evaluate function passed by api.ai.
@@ -633,38 +628,22 @@ function parse_price(unit_currency){
 */
 
 function read_csv(data, collectionName){
-  
-  if (collectionName == "restaurant") {
 
-    if(data){
+  if (data){
+
+    if (collectionName == "restaurant") {
       restaurant_data = data;
-          
-    } else {
-      console.log("Empty Data Collection: " + collectionName);
-    }
-
-  } else if (collectionName == "room_facility") {
-
-    if(data){
+    } else if (collectionName == "room_facility") {
       room_facility_data = data;
-    } else {
-      console.log("Empty Data Collection: " + collectionName);
+    } else if (collectionName == "hotel_facility") {
+      hotel_facility_data = data;
+    } else if (collectionName == "tourist_spot") {
+      tourist_spot_data = data;
     }
-  } else if (collectionName == "hotel_facility") {
-    if(data){
-      hotel_facility_data = data;       
-    } else {
-      console.log("Empty Data Collection: " + collectionName);
-    }
-  } else if (collectionName == "tourist_spot") {
-    if(data){
-      tourist_spot_data = data;       
-      console.log(tourist_spot_data)
-    } else {
-      console.log("Empty Data Collection: " + collectionName);
-    }
-  }
 
+  } else {
+    console.log("Empty Data Collection: " + collectionName);
+  }
 
 }
 
