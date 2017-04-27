@@ -301,6 +301,6 @@ body {
   line-height: 48px;
 }
 
-.message_template {
+.message_template, .message_template_image {
   display: none;
 }

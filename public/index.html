@@ -3,7 +3,7 @@
 <html lang="en">
   
   <head>
-    <title>DemoAgent</title>
+    <title>Hotel Agent</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -70,8 +70,6 @@
           <div class="text">Send</div>
         </div>
       </div>
-      
-
     </div>
 
     <!-- MUST: template for history logging -->
@@ -84,25 +82,27 @@
       </li>
     </div>
 
-
-
-
-      <div class="footer navbar-fixed-top" style="left:60%;">
-      <!--
-        <h4>Technical Documents</h4>
-        <ul>
-          <li><a href="out_backend/global.html#main">Backend technical document</a></li>
-          <li><a href="out_frontend/global.html#main">Frontend and embedded API technical document</a></li>
-        </ul>
-        -->
-        <input type="button" class="btn btn-info" onclick="location.href='out_backend/global.html#main';" value="Technical Document: Backend" />
-        <input type="button" class="btn btn-warning" onclick="location.href='out_frontend/global.html#main';" value="Technical Document: Frontend and embedded APIs" />
-      </div>
-      
-
+    <!-- MUST: template for history logging (image) -->
+    <div class="message_template_image">
+      <li class="message">
+        <div class="avatar"></div>
+        <div class="text_wrapper">
+          <div class="text"></div>
+          <img src="image/beth.jpg"/>
+        </div>
+      </li>
     </div>
 
-  <script src="index.js"></script>
+
+
+    <!-- The tech documents -->
+    <div class="footer navbar-fixed-top" style="left:60%;">
+      <input type="button" class="btn btn-info" onclick="location.href='out_backend/global.html#main';" value="Technical Document: Backend" />
+      <input type="button" class="btn btn-warning" onclick="location.href='out_frontend/global.html#main';" value="Technical Document: Frontend and embedded APIs" />
+    </div>
+      
+
+    <script src="index.js"></script>
 
   </body>
 </html>

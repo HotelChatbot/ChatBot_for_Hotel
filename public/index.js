@@ -5,35 +5,20 @@ $(function() {
   $('#serverToggle').change(function() {
     isConnectToDemoAgent = this.checked;
     if(isConnectToDemoAgent){
-      document.title = "Demo Agent";
+      document.title = "Hotel Agent";
     } else {
       document.title = "Server Test";
     }
     console.log("Agent Switched: Connect to DemoAgent? " + isConnectToDemoAgent);
   });
 
-  /*
-  $('#userTextButton').click(function(){
-    // Get userInput from form userText
-    var userInput = $('#userText').val();
-    sendAndWaitToOutputAPIAI(userInput);
-  });
-
-
-  // Allow ENTER-key press to trigger text enter
-  $("#userText").keyup(function(e){
-    if(e.keyCode === 13){
-      e.preventDefault();
-      $('#userTextButton').click()
-    }
-  });
-  */
-
+  // Capture the send button clicking
   $('.send_message').click(function (e) {
     var userInput = getMessageText()
     sendAndWaitToOutputAPIAI(userInput);
   });
 
+  // Capture the ENTER button clicking
   $('.message_input').keyup(function (e) {
     if (e.which === 13) {
       var userInput = getMessageText()
@@ -60,26 +45,56 @@ $(function() {
     return this;
   };
 
+  // The pretty history logging (image)
+  var Message_image;
+  Message_image = function (arg) {
+    this.text = arg.text, this.message_side = arg.message_side;
+    this.draw = function (_this) {
+      return function () {
+        var $message;
+        $message = $($('.message_template_image').clone().html());
+        $message.addClass(_this.message_side).find('.text').html(_this.text);
+        $('.messages').append($message);
+        return setTimeout(function () {
+          return $message.addClass('appeared');
+        }, 0);
+      };
+    }(this);
+    return this;
+  };
+
+  // Internal functions for getting input text and sending text
   var getMessageText, message_side, sendMessage;
   getMessageText = function () {
     var $message_input;
     $message_input = $('.message_input');
     return $message_input.val();
   };
-  sendMessage = function (text, message_side) {
+  sendMessage = function (text, message_side, image = false) {
+
       var $messages, message;
       if (text.trim() === '') {
         return;
       }
       $('.message_input').val('');
       $messages = $('.messages');
-      //message_side = message_side === 'left' ? 'right' : 'left';
-      message = new Message({
-        text: text,
-        message_side: message_side
-      });
+      
+      // Handle both text and image cases
+      if (image) {
+        message = new Message_image({
+          text: text,
+          message_side: message_side
+        });
+      } else {
+        message = new Message({
+          text: text,
+          message_side: message_side
+        });
+      }
+      
       message.draw();
       return $messages.animate({ scrollTop: $messages.prop('scrollHeight') }, 300);
+
   };
 
 
@@ -132,7 +147,20 @@ $(function() {
         var sysOutput = new SpeechSynthesisUtterance(text);
         window.speechSynthesis.speak(sysOutput);
         //display_speech(text);
-        sendMessage(text, 'left');
+
+
+        // This is for fun
+        // To embed the image display feature
+        // wait for further implementation on api.ai
+        // to hook it on
+        if (text.includes("restaurant")){
+          // True for image display
+          sendMessage(text, 'left', true);
+        } else {
+          sendMessage(text, 'left');
+        }
+
+
       } else {
         display_speech("Google API not supported");
       }
