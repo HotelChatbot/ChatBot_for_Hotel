@@ -85,7 +85,7 @@ io.on('connection', function(socket){
   socket.on('annyang', function(msg){
     console.log("annyang: " + msg);
   });
-
+ 
   // Send the userInput to api.ai when notified by front-end
   socket.on('send_to_apiai', function(arr){
     // Extract parameters
@@ -121,7 +121,8 @@ io.on('connection', function(socket){
         'restaurant_name': "",
         'last_inquired_facility' : "",
         'tourist_spot_name':"",
-        'tourist_spot_style':""
+        'tourist_spot_style':"",
+        'last_response':""
       };
       user_data[portNum]['recommend_restaurant'] = new Set() ;
       user_data[portNum]['recommend_tourist_spot'] = new Set() ;
@@ -142,7 +143,7 @@ io.on('connection', function(socket){
         sysOutput = eval_action(action, response, portNum);
         console.log(sysOutput)
       }
-      
+      user_data[portNum]['last_response'] = sysOutput;
       
       // Notify the front-end along with the response from api.ai
       socket.emit("response_from_apiai",sysOutput);
@@ -163,13 +164,8 @@ io.on('connection', function(socket){
 // Listening on the port
 http.listen(port, function(){
   console.log('listening on *:' + port);
-
-  //read db into server
-  //read_csv();
-
-
-
 });
+
 
 /**
 * Evaluate function passed by api.ai.
@@ -213,6 +209,12 @@ function eval_action(action, response, portNum){
     case "recomend_tourist_spot_with_type":
       response = recomend_tourist_spot_with_type(response, portNum);
       break;
+    case "hotel_facility_check_open":
+      response = hotel_facility_check_open(response, portNum);
+      break;
+    case "repeat_response":
+      response = repeat_response(response, portNum);
+      break;
   }   
   
   return response
@@ -231,13 +233,18 @@ function recommend_restaurant(response, portNum){
   //extract user request from the JSON response
   var priceRequest = "";
   var styleRequest = "";
+  var extremeRequest = "";
   if( 'unit-currency' in response.result.parameters){
     priceRequest = parse_price(response.result.parameters['unit-currency']);  
   }
   if('restaurant_style' in response.result.parameters){
     styleRequest = response.result.parameters["restaurant_style"];
   }
-   
+  if('restaurant_extreme_price' in response.result.parameters){
+    extremeRequest = response.result.parameters["restaurant_extreme_price"]
+  } 
+
+
   
   //update parameter if the response is not empty
   if(priceRequest && priceRequest.length > 0){
@@ -250,9 +257,7 @@ function recommend_restaurant(response, portNum){
   if(styleRequest && styleRequest.length > 0) {
     user_data[portNum]['restaurant_style'] = styleRequest;
   }
-  else{
-    styleRequest = user_data[portNum]['restaurant_style'];
-  }
+ 
   console.log("priceRequest",priceRequest);
   console.log("styleRequest",styleRequest);
 
@@ -261,8 +266,38 @@ function recommend_restaurant(response, portNum){
   var currentRestaurant = "";
   
   
-  
-  restaurant_data.forEach(function(restaurant){
+  if(extremeRequest.length>0){
+    console.log(extremeRequest)
+    var lastPrice;
+    if(extremeRequest == "cheapest") lastPrice = 88888;
+    else lastPrice = 0;
+    restaurant_data.forEach(function(restaurant){
+      var name = restaurant.name;
+      var price = restaurant.price;
+      var style = restaurant.style;
+      var location = restaurant.location;
+      //if the restaurant has not been recommended yet
+      if(!user_data[portNum]['recommend_restaurant'].has( name )){
+
+        //if the style match the style request
+        if( style == user_data[portNum]['restaurant_style'] || styleRequest.length==0){
+          //if user request 
+          if((parseInt(price) >= parseInt(lastPrice) &&extremeRequest == "most expensive") ||
+            (parseInt(price) <= parseInt(lastPrice) &&extremeRequest == "cheapest")){
+            currentRestaurant = name;
+            //update current user's data
+            user_data[portNum]['restaurant_price'] = price;
+            user_data[portNum]['restaurant_name'] = currentRestaurant;
+            lastPrice = price;
+             
+          }
+        }
+      }
+    });
+
+  }
+  else{
+    restaurant_data.forEach(function(restaurant){
     var name = restaurant.name;
     var price = restaurant.price;
     var style = restaurant.style;
@@ -276,15 +311,18 @@ function recommend_restaurant(response, portNum){
         if((parseInt(price) <= parseInt(priceRequest) &&user_data[portNum]['restaurant_price_request'][0] == '<') ||
           (parseInt(price) >= parseInt(priceRequest) &&user_data[portNum]['restaurant_price_request'][0] == '>')){
           currentRestaurant = name;
+          // console.log(price)
           //update current user's data
           user_data[portNum]['restaurant_price'] = price;
           user_data[portNum]['restaurant_name'] = currentRestaurant;
-          
+          user_data[portNum]['restaurant_style'] = style;
            
         }
       }
     }
   });
+  }
+  
   console.log("currentRestaurant", currentRestaurant);
   //no restaurant found
   if(!currentRestaurant){
@@ -433,6 +471,7 @@ function inquire_hotel_facility(response, portNum){
   if("hotel_facility_close_open" in response.result.parameters){
     closeOrOpen = response.result.parameters["hotel_facility_close_open"];  
   }
+ hotel_facility_check_open
   //user did not specify facility at all
   if(inquiredFacility.length==0){
     return "Which facility are you asking?";
@@ -610,6 +649,122 @@ function tourist_spot_give_detail(response, portNum){
   return response;
 }
 
+function hotel_facility_check_open(response, portNum){
+  var closeOrOpen="";
+  var facility="";
+  var date ="";
+  var time = "";
+  if("hotel_facility_close_open" in response.result.parameters){
+    closeOrOpen = response.result.parameters["hotel_facility_close_open"];  
+  }
+  if("hotel_facility" in response.result.parameters){
+    facility = response.result.parameters["hotel_facility"];  
+  }
+  if("date-period" in response.result.parameters){
+    date = response.result.parameters["date-period"];
+  }
+  if("time" in response.result.parameters){
+    time = response.result.parameters["time"];
+  }
+
+
+  if(facility.length ==0){
+    return "which facility are you talking about";
+  }
+
+  if(date == "Saturday" || date == "Sunday"){
+    reponse = ""
+    hotel_facility_data.forEach(function(hotel_facility){
+    
+      var name = hotel_facility.name;
+      var location = hotel_facility.location;
+      var opening_time = hotel_facility.opening_time;
+      var closing_time = hotel_facility.closing_time;
+      
+      if(name == facility){
+        
+        
+        response = "It is closed on " + date;
+        
+      }
+    });
+    if(response.length ==0) return "Sorry we don't have such facility.";
+    else return response;
+  }
+  else if (date.length >0){
+    response = ""
+    hotel_facility_data.forEach(function(hotel_facility){
+    
+      var name = hotel_facility.name;
+      var location = hotel_facility.location;
+      var opening_time = hotel_facility.opening_time;
+      var closing_time = hotel_facility.closing_time;
+      
+      if(name == facility){
+        response = "It is open on " +date;
+
+        
+        //if the inquiry is about closing or opening time
+        
+        if(closeOrOpen == "close"){
+
+          response += " and will closes at "+ closing_time;
+        }
+        else{
+          response += " and will opens at "+ opening_time; 
+        }
+        
+        
+      }
+    });
+    if(response.length ==0) return "Sorry we don't have such facility.";
+    else return response;
+  }
+  
+  else{
+    //user is asking if the gym is open now
+    response = ""
+    var specifiedTime = false
+    if(time.length == 0){
+
+      time = new Date().getHours()
+      
+    }
+    else{
+      time = parseInt( time.substr(0,2));
+      specifiedTime = true
+    }
+
+    hotel_facility_data.forEach(function(hotel_facility){
+    
+      var name = hotel_facility.name;
+      var location = hotel_facility.location;
+      var opening_time = hotel_facility.opening_time;
+      var closing_time = hotel_facility.closing_time;
+     
+      if(name == facility){
+        //if the inquiry is about closing or opening time
+        var openOrClose
+        if (isOpen(time, opening_time, closing_time)){
+          openOrClose = "open";
+        }
+        else openOrClose = "closed";
+
+        if (specifiedTime)response = "The " + facility + " is " + openOrClose + " then.";
+        else response = "The " + facility + " is " + openOrClose + " now.";
+        
+        
+      }
+    });
+    if(response.length ==0) return "Sorry we don't have such facility.";
+    else return response;
+  }
+}
+
+function repeat_response(response, portNum){
+  return user_data[portNum]['last_response']
+}
+
 /**
 * Handles probelm when the unit_curreny parameter passed by api.ai is not a string.
 *
@@ -633,38 +788,44 @@ function parse_price(unit_currency){
 */
 
 function read_csv(data, collectionName){
-  
-  if (collectionName == "restaurant") {
 
-    if(data){
+  if (data){
+
+    if (collectionName == "restaurant") {
       restaurant_data = data;
-          
-    } else {
-      console.log("Empty Data Collection: " + collectionName);
-    }
 
-  } else if (collectionName == "room_facility") {
-
-    if(data){
+    } else if (collectionName == "room_facility") {
       room_facility_data = data;
-    } else {
-      console.log("Empty Data Collection: " + collectionName);
-    }
-  } else if (collectionName == "hotel_facility") {
-    if(data){
-      hotel_facility_data = data;       
-    } else {
-      console.log("Empty Data Collection: " + collectionName);
-    }
-  } else if (collectionName == "tourist_spot") {
-    if(data){
-      tourist_spot_data = data;       
-      console.log(tourist_spot_data)
-    } else {
-      console.log("Empty Data Collection: " + collectionName);
-    }
-  }
+    } else if (collectionName == "hotel_facility") {
+      hotel_facility_data = data;
+      
+    } else if (collectionName == "tourist_spot") {
+      tourist_spot_data = data;
 
+    }
+
+  } else {
+    console.log("Empty Data Collection: " + collectionName);
+  }
 
 }
 
+function isOpen(time, open, close){
+  var openTime = parseInt(open.substr(0,2))
+  var closeTime = parseInt(close.substr(0,2))
+  var openM;
+  var closeM;
+  var timeM;
+  if(open.indexOf("PM") > -1){
+    openTime += 12
+  }
+  
+  if(close.indexOf("PM") > -1){
+    closeTime += 12
+  }
+  
+  if (time>= openTime && time < closeTime) return true
+  else return false;
+
+
+}

@@ -1,8 +1,13 @@
 <!-- Microphone testing: >> python -m SimpleHTTPServer -->
 <!doctype html>
-<html>
-  <title>DemoAgent</title>
+<html lang="en">
+  
   <head>
+    <title>Hotel Agent</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/annyang/2.6.0/annyang.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/SpeechKITT/0.3.0/speechkitt.min.js"></script>
@@ -16,25 +21,88 @@
 
   <body>
 
-    <h1>Hotel Agent</h1>
+  <!--
+    <div class="container-fluid">
 
-    <p id="display_text">I am listening</p>
+      <h1>Hotel Agent</h1>
+      <label for="display_text">Chatbot Speech:</label>
+      <p id="display_text">I am listening</p>
 
-    <hr/>
+      <div class="row">
 
-    <h3>User Mode (Disabled if in Test Mode)</h3>
-    <label class="switch">
-      <input id="serverToggle" type="checkbox" checked>
-      <div class="slider round"></div>
-    </label>
 
-    <hr/>
+        <div class="col-sm-5">-->
 
-    <h3>Text Mode</h3>
-    Message: <input type="text" id="userText" name="userText"><br>
-    <input id="userTextButton" type="submit" value="Submit">
+          <!-- <hr/>
+          <h3>User Mode (Disabled if in Test Mode)</h3>
+          <label class="switch">
+            <input id="serverToggle" type="checkbox" checked>
+            <div class="slider round"></div>
+          </label> -->
+          <!--<h3>Text Mode</h3>-->
+          <!--
+          <b>Your Input:</b> <input type="text" id="userText" name="userText"><br>
+          <input class="bluebutton button" id="userTextButton" type="submit" value="Submit">
 
-  <script src="index.js"></script>
+        </div>
+
+        <div class="col-sm-7">
+          
+        </div>
+
+      </div>
+      -->
+
+    
+    <div class="chat_window">
+      <div class="top_menu">
+        <div class="title">Hotel Agent</div>
+      </div>
+
+      <ul class="messages"></ul>
+      
+      <div class="bottom_wrapper clearfix">
+        <div class="message_input_wrapper">
+          <input class="message_input" placeholder="Type your message here..." />
+        </div>
+        <div class="send_message">
+          <div class="icon"></div>
+          <div class="text">Send</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MUST: template for history logging -->
+    <div class="message_template">
+      <li class="message">
+        <div class="avatar"></div>
+        <div class="text_wrapper">
+          <div class="text"></div>
+        </div>
+      </li>
+    </div>
+
+    <!-- MUST: template for history logging (image) -->
+    <div class="message_template_image">
+      <li class="message">
+        <div class="avatar"></div>
+        <div class="text_wrapper">
+          <div class="text"></div>
+          <img src="image/beth.jpg"/>
+        </div>
+      </li>
+    </div>
+
+
+
+    <!-- The tech documents -->
+    <div class="footer navbar-fixed-top" style="left:60%;">
+      <input type="button" class="btn btn-info" onclick="location.href='out_backend/global.html#main';" value="Technical Document: Backend" />
+      <input type="button" class="btn btn-warning" onclick="location.href='out_frontend/global.html#main';" value="Technical Document: Frontend and embedded APIs" />
+    </div>
+      
+
+    <script src="index.js"></script>
 
   </body>
 </html>
