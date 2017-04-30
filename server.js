@@ -17,6 +17,9 @@ var bodyParser = require('body-parser');
 // Dialog Manager
 var apiai = require('apiai');
 
+// Http Request
+var request = require('request');
+
 // Global Initialization
 var TOKEN_DemoAgent = "ecc353311a954139b3ff036c8f6eb2ae";
 var TOKEN_ServerTest = "8010c7fae89f4faeb8fe10470ae77742";
@@ -214,6 +217,9 @@ function eval_action(action, response, portNum){
       break;
     case "repeat_response":
       response = repeat_response(response, portNum);
+      break;
+    case "iot_control":
+      response = iot_control(response, portNum);
       break;
   }   
   
@@ -759,6 +765,27 @@ function hotel_facility_check_open(response, portNum){
     if(response.length ==0) return "Sorry we don't have such facility.";
     else return response;
   }
+}
+
+function iot_control(response,portNum){
+
+  
+  var url = "https://young-castle-82935.herokuapp.com/api";
+  var action;
+  var facility;
+  if("iot_action" in response.result.parameters){
+    action = response.result.parameters["iot_action"];
+  }
+
+  if("iot_facility" in response.result.parameters){
+    facility = response.result.parameters["iot_facility"];
+  }
+  var parameters = {'action':action, 'facility':facility};
+  request({url:url, qs:parameters},function(err,response, body){
+    if(err) { console.log(err); return "error"; }
+    console.log("Get response: " + response.statusCode);
+  });
+  return response.result.fulfillment.speech
 }
 
 function repeat_response(response, portNum){
