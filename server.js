@@ -147,9 +147,15 @@ io.on('connection', function(socket){
         console.log("Chatbot: " + sysOutput);
       }
       
+      // Required to be an object
+      // Example to send a message along with a image
+      var sysOutputObj = {message: sysOutput, image: "image/beth.jpg"};
+      // Send message without an image
+      // var sysOutputObj = {message: sysOutput, image: ""};
       
       // Notify the front-end along with the response from api.ai
-      socket.emit("response_from_apiai",sysOutput);
+      socket.emit("response_from_apiai",sysOutputObj);
+      
     });
 
     request.on('error', function(error) {
