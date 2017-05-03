@@ -1,51 +1,51 @@
 id,name,price,location,style
-0,Linglan,50,location,japanese
-1,Yilan,100,location,japanese
-2,Danuki,400,location,japanese
-3,Kobuda,250,location,japanese
-4,Kitzene,700,location,japanese
-5,Neko,1000,location,japanese
+0,Linglan,50,300 meters,japanese
+1,Yilan,100,200 meters,japanese
+2,Danuki,400,100 meters,japanese
+3,Kobuda,250,330 meters,japanese
+4,Kitzene,700,220 meters,japanese
+5,Neko,1000,270 meters,japanese
 6,Stone Korean Restaurant,300,location,korean
-7,Smoky Korean Barbecue,500,location,korean
-8,Balabar's Kitchen,600,location,korean
-9,Coollooc Korean Restaurant,850,location,korean
-10,Klaan Korean Kitchen,70,location,korean
-11,Good Good Eat Restaurant,300,location,chinese
-12,Lao Grandpa,100,location,chinese
-13,Very Good Eat,550,location,chinese
-14,Super Good Eat Restaurant,800,location,chinese
-15,Good Eat,100,location,chinese
-16,Pu-tong Good Eat Restaurant,30,location,chinese
-17,Old Guards,750,location,french
-18,Dragoon French Cuisine,650,location,french
-19,Lancers French Restaurant,350,location,french
-20,Cuirassiers Cuisine,900,location,french
-21,Chasseur a Cheval,200,location,french
-22,Hussars Cuisines,500,location,french
-23,Bob and Qoq Hot Sticks,250,location,BBQ
-24,Roasty Kitchen,400,location,BBQ
-25,Flames Downunder,800,location,BBQ
-26,Firing Chicken and Lamb,650,location,BBQ
-27,Ciao Italian Restaurant,150,location,italian
-28,Ciao Ciao Speghetti,400,location,italian
-29,Ciao and Ciao's Pizza,600,location,italian
-30,Arreviderci Pizza House,800,location,italian
-31,ArreviderLa Italian Cuisine,950,location,italian
-32,Very Spicy Curry House,850,location,indian
-33,Spicy Curry Kitchen,600,location,indian
-34,Medium Hot Dishes,400,location,indian
-35,Mild Curry Restaurant,200,location,indian
-36,Curry House,80,location,indian
-37,Bangkok Dishes,750,location,thai
-38,Chiang Mai Thai,450,location,thai
-39,Elephant's House,100,location,thai
-40,Healthy Vegetarians,300,location,thai
-41,Uncle Sam,350,location,american
-42,Uncle Sammy's Chips and Burgers,150,location,american
-43,Uncle Samuel's Steak House,500,location,american
-44,Aunt Samantha's Burger,100,location,american
-45,Jar Jar Binks Your Card,20,location,streetfood
-46,French's Best Crepes,40,location,streetfood
-47,Obi-wan Kebab,30,location,streetfood
-48,Kenobi Fried Chicken,20,location,streetfood
-49,McDarthvader's,50,location,american
+7,Smoky Korean Barbecue,500,120 meters,korean
+8,Balabar's Kitchen,600,300 meters,korean
+9,Coollooc Korean Restaurant,850,300 meters,korean
+10,Klaan Korean Kitchen,70,100 meters,korean
+11,Good Good Eat Restaurant,300,200 meters,chinese
+12,Lao Grandpa,100,250 meters,chinese
+13,Very Good Eat,550,350 meters,chinese
+14,Super Good Eat Restaurant,800,200 meters,chinese
+15,Good Eat,100,80 meters,chinese
+16,Pu-tong Good Eat Restaurant,30,150 meters,chinese
+17,Old Guards,750,200 meters,french
+18,Dragoon French Cuisine,650,50meters,french
+19,Lancers French Restaurant,350,200 meters,french
+20,Cuirassiers Cuisine,900,300 meters,french
+21,Chasseur a Cheval,200,150 meters,french
+22,Hussars Cuisines,500,85 meters,french
+23,Bob and Qoq Hot Sticks,250,100 meters,BBQ
+24,Roasty Kitchen,400,80 meters,BBQ
+25,Flames Downunder,800,230 meters,BBQ
+26,Firing Chicken and Lamb,650,100 meters,BBQ
+27,Ciao Italian Restaurant,150,65 meters,italian
+28,Ciao Ciao Speghetti,400,300 meters,italian
+29,Ciao and Ciao's Pizza,600,300 meters,italian
+30,Arreviderci Pizza House,800,250 meters,italian
+31,ArreviderLa Italian Cuisine,950,230 meters,italian
+32,Very Spicy Curry House,850,200 meters,indian
+33,Spicy Curry Kitchen,600,150 meters,indian
+34,Medium Hot Dishes,400,300 meters ,indian
+35,Mild Curry Restaurant,200,150 meters,indian
+36,Curry House,80,70 meters,indian
+37,Bangkok Dishes,750,150 meters,thai
+38,Chiang Mai Thai,450,130 meters,thai
+39,Elephant's House,100,200 meters,thai
+40,Healthy Vegetarians,300,330 meters,thai
+41,Uncle Sam,350,400 meters,american
+42,Uncle Sammy's Chips and Burgers,150,400 meters,american
+43,Uncle Samuel's Steak House,500,50 meters,american
+44,Aunt Samantha's Burger,100,150 meters,american
+45,Jar Jar Binks Your Card,20,250 meters,streetfood
+46,French's Best Crepes,40,200 meters,streetfood
+47,Obi-wan Kebab,30,250 meters,streetfood
+48,Kenobi Fried Chicken,20,150 meters,streetfood
+49,McDarthvader's,50,200 meters,american
