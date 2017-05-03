@@ -149,7 +149,7 @@ io.on('connection', function(socket){
       
       // Required to be an object
       // Example to send a message along with a image
-      var sysOutputObj = {message: sysOutput, image: "image/beth.jpg"};
+      var sysOutputObj = {message: sysOutput, image: "image/car.jpg"};
       // Send message without an image
       // var sysOutputObj = {message: sysOutput, image: ""};
       
