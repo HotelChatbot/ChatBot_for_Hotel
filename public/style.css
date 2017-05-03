@@ -304,3 +304,7 @@ body {
 .message_template, .message_template_image {
   display: none;
 }
+
+.image {
+  width: 100%;
+}
