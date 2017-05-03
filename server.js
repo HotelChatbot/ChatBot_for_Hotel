@@ -156,6 +156,7 @@ io.on('connection', function(socket){
       
       // Required to be an object
       // Example to send a message along with a image
+
       var imageURL = "";
       if(sysOutput.indexOf("restaurant") > -1 && sysOutput.indexOf("What") == -1){
         
@@ -163,6 +164,7 @@ io.on('connection', function(socket){
       }
       console.log("imageURL"+imageURL+imageURL.length);
       var sysOutputObj = {message: sysOutput, image: imageURL};
+
       // Send message without an image
       // var sysOutputObj = {message: sysOutput, image: ""};
 
