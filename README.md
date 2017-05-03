@@ -17,13 +17,13 @@
 #### 4. Open another console to activate the database(if haven't)
 `mongod`
 #### 5. Go back to original console and load the datacase documents
-```mongoimport -d hotel-chatbot -c restaurant --type csv --file public/restaurant.csv --headerline```
+```mongoimport -d hotel-chatbot -c restaurant --type csv --file public/restaurant.csv --headerline --upsertFields name```
 
-```mongoimport -d hotel-chatbot -c hotel_facility --type csv --file public/hotel_facility.csv --headerline```
+```mongoimport -d hotel-chatbot -c hotel_facility --type csv --file public/hotel_facility.csv --headerline --upsertFields name```
 
-```mongoimport -d hotel-chatbot -c room_facility --type csv --file public/room_facility.csv --headerline```
+```mongoimport -d hotel-chatbot -c room_facility --type csv --file public/room_facility.csv --headerline --upsertFields name```
 
-```mongoimport -d hotel-chatbot -c tourist_spot --type csv --file public/tourist_spot.csv --headerline```
+```mongoimport -d hotel-chatbot -c tourist_spot --type csv --file public/tourist_spot.csv --headerline --upsertFields name```
 
 
 ## Activation

@@ -24,6 +24,8 @@ var request = require('request');
 var TOKEN_DemoAgent = "ecc353311a954139b3ff036c8f6eb2ae";
 var TOKEN_ServerTest = "8010c7fae89f4faeb8fe10470ae77742";
 
+// Weather Information
+var weather = require('weather-js');
 
 // Connect to database with specification
 if (process.env.PORT) {
@@ -73,6 +75,7 @@ var restaurant_data = [];
 var room_facility_data = [];
 var hotel_facility_data = [];
 var tourist_spot_data = [];
+var weather_data = {};
 // Build up the routers
 require('./app/routes.js')(app);
 
@@ -144,12 +147,29 @@ io.on('connection', function(socket){
         console.log("action",action);
         //decide ouput by evaluating the action
         sysOutput = eval_action(action, response, portNum);
-        console.log(sysOutput)
+        //console.log(JSON.stringify(sysOutput, null, 2));
+        console.log("Chatbot: " + sysOutput);
       }
+
       user_data[portNum]['last_response'] = sysOutput;
+
+      
+      // Required to be an object
+      // Example to send a message along with a image
+      var imageURL = "";
+      if(sysOutput.indexOf("restaurant") > -1 && sysOutput.indexOf("What") == -1){
+        
+        var imageURL = "image/restaurant/"  + user_data[portNum]['restaurant_name'] + '.png';
+      }
+      console.log("imageURL"+imageURL+imageURL.length);
+      var sysOutputObj = {message: sysOutput, image: imageURL};
+      // Send message without an image
+      // var sysOutputObj = {message: sysOutput, image: ""};
+
       
       // Notify the front-end along with the response from api.ai
-      socket.emit("response_from_apiai",sysOutput);
+      socket.emit("response_from_apiai",sysOutputObj);
+      
     });
 
     request.on('error', function(error) {
@@ -160,8 +180,12 @@ io.on('connection', function(socket){
 
   });
 
+});
 
-
+// Load Weather Data beforehand to speed up response
+weather.find({search: 'Hong Kong SAR', degreeType: 'C'}, function(err, result) {
+  if(err) console.log(err);
+  weather_data = result[0];
 });
 
 // Listening on the port
@@ -220,6 +244,13 @@ function eval_action(action, response, portNum){
       break;
     case "iot_control":
       response = iot_control(response, portNum);
+
+    case "check_current_weather":
+      response = check_current_weather(response, portNum);
+      break;
+    case "check_predict_weather":
+      response = check_predict_weather(response, portNum);
+
       break;
   }   
   
@@ -837,6 +868,7 @@ function read_csv(data, collectionName){
 
 }
 
+
 function isOpen(time, open, close){
   var openTime = parseInt(open.substr(0,2))
   var closeTime = parseInt(close.substr(0,2))
@@ -856,3 +888,47 @@ function isOpen(time, open, close){
 
 
 }
+
+/*
+var check_current_weather = weather.find({search: 'Hong Kong SAR', degreeType: 'C'}, function(err, result) {
+    if(err) console.log(err);
+    var current = result[0].current;
+    console.log(JSON.stringify(current, null, 2));
+
+    response = "This is the weather";
+    return response;
+  });
+*/
+
+
+function check_current_weather(response, portNum){
+  var current = weather_data.current;
+  response = "The weather today is " + current.skytext + ", and the temperature is around " + current.temperature + " in Celsius degree. The humidity is " + current.humidity + " percent. Have a great day!";
+  return response;
+}
+
+function check_predict_weather(response, portNum){
+
+  var date = response.result.parameters.date;
+  var forecast = weather_data.forecast;
+
+  var i = 0;
+  while (i < forecast.length){
+    console.log(forecast[i].date + " =?= " + date);
+    if (forecast[i].date == date){
+
+      response = "The weather forecast for the day is " + forecast[i].skytextday + ", and the temperature is from " + forecast[i].low + " to " + forecast[i].high + " in Celsius degree.";
+      return response;
+    }
+    i += 1;
+  }
+
+  response = "Sorry, the weather forecast for the day is not available.";
+  return response;
+}
+
+
+
+
+
+

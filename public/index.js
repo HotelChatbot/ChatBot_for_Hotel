@@ -48,12 +48,13 @@ $(function() {
   // The pretty history logging (image)
   var Message_image;
   Message_image = function (arg) {
-    this.text = arg.text, this.message_side = arg.message_side;
+    this.text = arg.text, this.message_side = arg.message_side, this.imageAddr = arg.imageAddr;  // bring in the image address
     this.draw = function (_this) {
       return function () {
         var $message;
         $message = $($('.message_template_image').clone().html());
         $message.addClass(_this.message_side).find('.text').html(_this.text);
+        $message.find('.image').attr('src',_this.imageAddr);   // Change the image address
         $('.messages').append($message);
         return setTimeout(function () {
           return $message.addClass('appeared');
@@ -70,7 +71,7 @@ $(function() {
     $message_input = $('.message_input');
     return $message_input.val();
   };
-  sendMessage = function (text, message_side, image = false) {
+  sendMessage = function (text, message_side, image = false, imageAddr = "") {
 
       var $messages, message;
       if (text.trim() === '') {
@@ -83,7 +84,8 @@ $(function() {
       if (image) {
         message = new Message_image({
           text: text,
-          message_side: message_side
+          message_side: message_side,
+          imageAddr: imageAddr
         });
       } else {
         message = new Message({
@@ -115,7 +117,7 @@ $(function() {
     sysCanOutput = true;
     // Wait for the response from the server along with the response from api.ai
     socket.on("response_from_apiai", function(response){
-      console.log("response_from_apiai: " + response);
+      console.log("response_from_apiai: " + response.message);
       // Speak out the response
       produce_voice_output(response);
       
@@ -138,24 +140,25 @@ $(function() {
   * @method produce_voice_output
   * @param {String} text Text to be output as sound.
   */
-  function produce_voice_output(text) {
+  function produce_voice_output(obj) {
     if(sysCanOutput){
       // Wait for next user speech initiative
       sysCanOutput = false;
+      var text = obj.message;
+      var imageAddr = obj.image;
       // Check whether the browser support the synthesisor
       if ('speechSynthesis' in window) {
         var sysOutput = new SpeechSynthesisUtterance(text);
         window.speechSynthesis.speak(sysOutput);
         //display_speech(text);
 
-
         // This is for fun
         // To embed the image display feature
         // wait for further implementation on api.ai
         // to hook it on
-        if (text.includes("restaurant")){
+        if (imageAddr!=""){
           // True for image display
-          sendMessage(text, 'left', true);
+          sendMessage(text, 'left', true, imageAddr);
         } else {
           sendMessage(text, 'left');
         }
