@@ -17,6 +17,9 @@ var bodyParser = require('body-parser');
 // Dialog Manager
 var apiai = require('apiai');
 
+// Http Request
+var request = require('request');
+
 // Global Initialization
 var TOKEN_DemoAgent = "ecc353311a954139b3ff036c8f6eb2ae";
 var TOKEN_ServerTest = "8010c7fae89f4faeb8fe10470ae77742";
@@ -63,9 +66,9 @@ app.use(express.static("public"));
 // Enable auto parsing the request body
 app.use(bodyParser.urlencoded({ extended: true }));
 // parse application/json
-app.use(bodyParser.json()); 
+app.use(bodyParser.json());
 // parse application/vnd.api+json as json
-app.use(bodyParser.json({type: 'application/vnd.api+json'})); 
+app.use(bodyParser.json({type: 'application/vnd.api+json'}));
 
 var user_data = {};
 var restaurant_data = [];
@@ -83,7 +86,7 @@ io.on('connection', function(socket){
   // Get the client's connection port
   var portNum = socket.request.connection.remotePort
   console.log("Connection on port" + portNum);
-  
+
   // Waiting for the start of the speech recognition
   socket.on('annyang', function(msg){
     console.log("annyang: " + msg);
@@ -118,20 +121,21 @@ io.on('connection', function(socket){
     //if user has not been initailized
     if(!user_data[portNum]){
       //initailize user
-      user_data[portNum] = 
+      user_data[portNum] =
       { 'restaurant_style':"",
         'restaurant_price':"",
         'restaurant_name': "",
         'last_inquired_facility' : "",
         'tourist_spot_name':"",
-        'tourist_spot_style':""
+        'tourist_spot_style':"",
+        'last_response':""
       };
       user_data[portNum]['recommend_restaurant'] = new Set() ;
       user_data[portNum]['recommend_tourist_spot'] = new Set() ;
       //current requested price range
       user_data[portNum]['restaurant_price_request'] = ['<', '1000'];
     }
-    
+
 
     // Waiting for the response from api.ai
     request.on('response', function(response) {
@@ -146,22 +150,34 @@ io.on('connection', function(socket){
         //console.log(JSON.stringify(sysOutput, null, 2));
         console.log("Chatbot: " + sysOutput);
       }
-      
+
+      user_data[portNum]['last_response'] = sysOutput;
+
+
       // Required to be an object
       // Example to send a message along with a image
-      var sysOutputObj = {message: sysOutput, image: "image/car.jpg"};
+
+      var imageURL = "";
+      if(sysOutput.indexOf("restaurant") > -1 && sysOutput.indexOf("What") == -1){
+
+        var imageURL = "image/restaurant/"  + user_data[portNum]['restaurant_name'] + '.png';
+      }
+      console.log("imageURL"+imageURL+imageURL.length);
+      var sysOutputObj = {message: sysOutput, image: imageURL};
+
       // Send message without an image
       // var sysOutputObj = {message: sysOutput, image: ""};
-      
+
+
       // Notify the front-end along with the response from api.ai
       socket.emit("response_from_apiai",sysOutputObj);
-      
+
     });
 
     request.on('error', function(error) {
       console.log(error);
     });
-     
+
     request.end();
 
   });
@@ -222,14 +238,26 @@ function eval_action(action, response, portNum){
     case "recomend_tourist_spot_with_type":
       response = recomend_tourist_spot_with_type(response, portNum);
       break;
+    case "hotel_facility_check_open":
+      response = hotel_facility_check_open(response, portNum);
+      break;
+    case "repeat_response":
+      response = repeat_response(response, portNum);
+      break;
+    case "iot_control":
+      response = iot_control(response, portNum);
+      break;
     case "check_current_weather":
       response = check_current_weather(response, portNum);
       break;
     case "check_predict_weather":
       response = check_predict_weather(response, portNum);
       break;
-  }   
-  
+    case "mode_control":
+      response = mode_control(response, portNum);
+      break;
+  }
+
   return response
 }
 
@@ -246,14 +274,19 @@ function recommend_restaurant(response, portNum){
   //extract user request from the JSON response
   var priceRequest = "";
   var styleRequest = "";
+  var extremeRequest = "";
   if( 'unit-currency' in response.result.parameters){
-    priceRequest = parse_price(response.result.parameters['unit-currency']);  
+    priceRequest = parse_price(response.result.parameters['unit-currency']);
   }
   if('restaurant_style' in response.result.parameters){
     styleRequest = response.result.parameters["restaurant_style"];
   }
-   
-  
+  if('restaurant_extreme_price' in response.result.parameters){
+    extremeRequest = response.result.parameters["restaurant_extreme_price"]
+  }
+
+
+
   //update parameter if the response is not empty
   if(priceRequest && priceRequest.length > 0){
     user_data[portNum]['restaurant_price_request'][0] = '<';
@@ -265,19 +298,47 @@ function recommend_restaurant(response, portNum){
   if(styleRequest && styleRequest.length > 0) {
     user_data[portNum]['restaurant_style'] = styleRequest;
   }
-  else{
-    styleRequest = user_data[portNum]['restaurant_style'];
-  }
+
   console.log("priceRequest",priceRequest);
   console.log("styleRequest",styleRequest);
 
   //initialize variables for the later loop
   var currentPrice = "";
   var currentRestaurant = "";
-  
-  
-  
-  restaurant_data.forEach(function(restaurant){
+
+
+  if(extremeRequest.length>0){
+    console.log(extremeRequest)
+    var lastPrice;
+    if(extremeRequest == "cheapest") lastPrice = 88888;
+    else lastPrice = 0;
+    restaurant_data.forEach(function(restaurant){
+      var name = restaurant.name;
+      var price = restaurant.price;
+      var style = restaurant.style;
+      var location = restaurant.location;
+      //if the restaurant has not been recommended yet
+      if(!user_data[portNum]['recommend_restaurant'].has( name )){
+
+        //if the style match the style request
+        if( style == user_data[portNum]['restaurant_style'] || styleRequest.length==0){
+          //if user request
+          if((parseInt(price) >= parseInt(lastPrice) &&extremeRequest == "most expensive") ||
+            (parseInt(price) <= parseInt(lastPrice) &&extremeRequest == "cheapest")){
+            currentRestaurant = name;
+            //update current user's data
+            user_data[portNum]['restaurant_price'] = price;
+            user_data[portNum]['restaurant_name'] = currentRestaurant;
+            lastPrice = price;
+
+          }
+        }
+      }
+    });
+
+  }
+  else{
+    restaurant_data.forEach(function(restaurant){
     var name = restaurant.name;
     var price = restaurant.price;
     var style = restaurant.style;
@@ -287,19 +348,22 @@ function recommend_restaurant(response, portNum){
 
       //if the style match the style request
       if( style == user_data[portNum]['restaurant_style']){
-        //if user request 
+        //if user request
         if((parseInt(price) <= parseInt(priceRequest) &&user_data[portNum]['restaurant_price_request'][0] == '<') ||
           (parseInt(price) >= parseInt(priceRequest) &&user_data[portNum]['restaurant_price_request'][0] == '>')){
           currentRestaurant = name;
+          // console.log(price)
           //update current user's data
           user_data[portNum]['restaurant_price'] = price;
           user_data[portNum]['restaurant_name'] = currentRestaurant;
-          
-           
+          user_data[portNum]['restaurant_style'] = style;
+
         }
       }
     }
   });
+  }
+
   console.log("currentRestaurant", currentRestaurant);
   //no restaurant found
   if(!currentRestaurant){
@@ -308,25 +372,25 @@ function recommend_restaurant(response, portNum){
     console.log("No restaurant");
     //if user did not specify restaurant style
     if(styleRequest==""){
-      response = "What kind of restaurant do you like?";  
+      response = "What kind of restaurant do you like?";
     }
     else{
-      response = "Sorry we cannot find any restaurant that meets your criteria. What kind of restaurant do you like";  
+      response = "Sorry we cannot find any restaurant that meets your criteria. What kind of restaurant do you like";
     }
-    
-    
-    
+
+
+
   }
   else{
     //add current restaurant to the set so that you don't duplicate recommendation
     user_data[portNum]['recommend_restaurant'].add(currentRestaurant);
-    
+
     console.log(user_data);
     //concatenate data into response
-    response = "Here is a "+ user_data[portNum]['restaurant_style'] + " restaurant called " + currentRestaurant +" that costs around " +user_data[portNum]['restaurant_price'];  
+    response = "Here is a "+ user_data[portNum]['restaurant_style'] + " restaurant called " + currentRestaurant +" that costs around " +user_data[portNum]['restaurant_price'];
   }
-  
-  
+
+
   return response;
 }
 
@@ -341,7 +405,7 @@ function recommend_restaurant(response, portNum){
 function restaurant_give_detail(response, portNum){
   //get user's request from JSON response
   var priceRequest = parse_price(response.result.parameters['unit-currency']);
-  
+
   restaurant_data.forEach(function(restaurant){
     var name = restaurant.name;
     var price = restaurant.price;
@@ -351,8 +415,8 @@ function restaurant_give_detail(response, portNum){
     if(name == user_data[portNum]['restaurant_name']){
 
         response = "the restaurant is located at " + location + " and it costs you around "+ price;
-    }   
-    
+    }
+
   });
   return response;
 }
@@ -368,7 +432,7 @@ function restaurant_give_detail(response, portNum){
 function restaurant_check_price(response, portNum){
   //get user's request from JSON response
   var priceRequest = parse_price(user_data[portNum]['restaurant_price']);
-  
+
   restaurant_data.forEach(function(restaurant){
     var name = restaurant.name;
     var price = restaurant.price;
@@ -378,8 +442,8 @@ function restaurant_check_price(response, portNum){
     if(name == user_data[portNum]['restaurant_name']){
 
         response = "the restaurant costs you around "+ price;
-    }   
-    
+    }
+
   });
   return response;
 }
@@ -395,7 +459,7 @@ function restaurant_check_price(response, portNum){
 function restaurant_price_switch(response, portNum){
   //get user's request from JSON response
   var priceRequest = response.result.parameters["price_request"];
-  
+
   if( priceRequest=="lower" ){
 
     user_data[portNum]['restaurant_price_request'][0] == '<';
@@ -420,7 +484,7 @@ function restaurant_price_switch(response, portNum){
 * @return {String} response Speech response that will return to the end user.
 */
 function restaurant_style_switch(response, portNum){
-  
+
   user_data[portNum]['restaurant_style'] = response.result.parameters["restaurant_style"];
   return recommend_restaurant(response, portNum);
 }
@@ -446,21 +510,22 @@ function inquire_hotel_facility(response, portNum){
   }
   var inquiryParameter = response.result.parameters["inquiry_parameter"];
   if("hotel_facility_close_open" in response.result.parameters){
-    closeOrOpen = response.result.parameters["hotel_facility_close_open"];  
+    closeOrOpen = response.result.parameters["hotel_facility_close_open"];
   }
+ hotel_facility_check_open
   //user did not specify facility at all
   if(inquiredFacility.length==0){
     return "Which facility are you asking?";
   }
   var inquiredLocation= "";
   var inquiredTime = "";
-  
+
   //if there is no such facility
-  
+
   response = "Sorry we don't have such facility";
-  
+
   hotel_facility_data.forEach(function(hotel_facility){
-    
+
     var name = hotel_facility.name;
     var location = hotel_facility.location;
     var opening_time = hotel_facility.opening_time;
@@ -468,16 +533,16 @@ function inquire_hotel_facility(response, portNum){
 
     if(name == inquiredFacility){
       inquiredLocation = location;
-      
+
       //if the inquiry is about closing or opening time
       if(inquiryParameter == "time"){
         if(closeOrOpen == "close"){
           response = name + " will close at "+ closing_time;
         }
         else{
-           response = name + " will open at "+ opening_time; 
+           response = name + " will open at "+ opening_time;
         }
-      } 
+      }
       else{
         response = name + " is "+ location;
       }
@@ -497,7 +562,7 @@ function inquire_hotel_facility(response, portNum){
 * @return {String} response Speech response that will return to the end user.
 */
 function inquire_room_facility(response, portNum){
-  var inquired_facility = response.result.parameters["Roomservicetype"];  
+  var inquired_facility = response.result.parameters["Roomservicetype"];
   response = "Sorry we don't have such room facility.";
 
   room_facility_data.forEach(function(room_facility){
@@ -541,10 +606,10 @@ function recomend_tourist_spot_with_type(response, portNum){
 
   if('tourist-spot-architecture' in response.result.parameters){
     //set style as the response passed by user
-    user_data[portNum]['tourist_spot_style'] = response.result.parameters["tourist-spot-architecture"];   
+    user_data[portNum]['tourist_spot_style'] = response.result.parameters["tourist-spot-architecture"];
   }
   return recommend_tourist_spot(response,portNum);
-    
+
 }
 
 /**
@@ -557,7 +622,7 @@ function recomend_tourist_spot_with_type(response, portNum){
 */
 function recommend_tourist_spot(response,portNum){
   //initialize variables for the later loop
-  
+
   var currentTouristSpot = "";
   var currentDistance = "";
   tourist_spot_data.forEach(function(tourist_spot){
@@ -585,18 +650,18 @@ function recommend_tourist_spot(response,portNum){
     //might need to reset context here
     console.log("No tourist spot");
     //if user did not specify restaurant style
-    response = "Sorry we cannot find any tourist spot that meets your criteria. What kind of tourist spot do you like";  
-    
+    response = "Sorry we cannot find any tourist spot that meets your criteria. What kind of tourist spot do you like";
+
   }
   else{
     //add current restaurant to the set so that you don't duplicate recommendation
     user_data[portNum]['recommend_tourist_spot'].add(currentTouristSpot);
-    
+
     console.log(user_data);
     //concatenate data into response
-    response = "Here is a "+ user_data[portNum]['tourist_spot_style'] + " called " + currentTouristSpot +" that is " + currentDistance +" away from you.";  
+    response = "Here is a "+ user_data[portNum]['tourist_spot_style'] + " called " + currentTouristSpot +" that is " + currentDistance +" away from you.";
   }
-  
+
   return response;
 }
 /**
@@ -618,11 +683,149 @@ function tourist_spot_give_detail(response, portNum){
     console.log(name, user_data[portNum]["tourist_spot_name"]);
     if(name == user_data[portNum]["tourist_spot_name"]){
       response = name + " costs around " + price + " and it is " + distance +" away from you";
-      
+
     }
   });
   console.log("ggg");
   return response;
+}
+
+function hotel_facility_check_open(response, portNum){
+  var closeOrOpen="";
+  var facility="";
+  var date ="";
+  var time = "";
+  if("hotel_facility_close_open" in response.result.parameters){
+    closeOrOpen = response.result.parameters["hotel_facility_close_open"];
+  }
+  if("hotel_facility" in response.result.parameters){
+    facility = response.result.parameters["hotel_facility"];
+  }
+  if("date-period" in response.result.parameters){
+    date = response.result.parameters["date-period"];
+  }
+  if("time" in response.result.parameters){
+    time = response.result.parameters["time"];
+  }
+
+
+  if(facility.length ==0){
+    return "which facility are you talking about";
+  }
+
+  if(date == "Saturday" || date == "Sunday"){
+    reponse = ""
+    hotel_facility_data.forEach(function(hotel_facility){
+
+      var name = hotel_facility.name;
+      var location = hotel_facility.location;
+      var opening_time = hotel_facility.opening_time;
+      var closing_time = hotel_facility.closing_time;
+
+      if(name == facility){
+
+
+        response = "It is closed on " + date;
+
+      }
+    });
+    if(response.length ==0) return "Sorry we don't have such facility.";
+    else return response;
+  }
+  else if (date.length >0){
+    response = ""
+    hotel_facility_data.forEach(function(hotel_facility){
+
+      var name = hotel_facility.name;
+      var location = hotel_facility.location;
+      var opening_time = hotel_facility.opening_time;
+      var closing_time = hotel_facility.closing_time;
+
+      if(name == facility){
+        response = "It is open on " +date;
+
+
+        //if the inquiry is about closing or opening time
+
+        if(closeOrOpen == "close"){
+
+          response += " and will closes at "+ closing_time;
+        }
+        else{
+          response += " and will opens at "+ opening_time;
+        }
+
+
+      }
+    });
+    if(response.length ==0) return "Sorry we don't have such facility.";
+    else return response;
+  }
+
+  else{
+    //user is asking if the gym is open now
+    response = ""
+    var specifiedTime = false
+    if(time.length == 0){
+
+      time = new Date().getHours()
+
+    }
+    else{
+      time = parseInt( time.substr(0,2));
+      specifiedTime = true
+    }
+
+    hotel_facility_data.forEach(function(hotel_facility){
+
+      var name = hotel_facility.name;
+      var location = hotel_facility.location;
+      var opening_time = hotel_facility.opening_time;
+      var closing_time = hotel_facility.closing_time;
+
+      if(name == facility){
+        //if the inquiry is about closing or opening time
+        var openOrClose
+        if (isOpen(time, opening_time, closing_time)){
+          openOrClose = "open";
+        }
+        else openOrClose = "closed";
+
+        if (specifiedTime)response = "The " + facility + " is " + openOrClose + " then.";
+        else response = "The " + facility + " is " + openOrClose + " now.";
+
+
+      }
+    });
+    if(response.length ==0) return "Sorry we don't have such facility.";
+    else return response;
+  }
+}
+
+function iot_control(response,portNum){
+
+
+  var url = "https://young-castle-82935.herokuapp.com/api/facility";
+  var action;
+  var facility;
+  if("iot_action" in response.result.parameters){
+    action = response.result.parameters["iot_action"];
+  }
+
+  if("iot_facility" in response.result.parameters){
+    facility = response.result.parameters["iot_facility"];
+  }
+  var parameters = {'action':action, 'facility':facility};
+  request({url:url, qs:parameters},function(err,response, body){
+    if(err) { console.log(err); return "error"; }
+    console.log("Get response: " + response.statusCode);
+  });
+  // console.log(response.result.fulfillment.speech)
+  return response.result.fulfillment.speech
+}
+
+function repeat_response(response, portNum){
+  return user_data[portNum]['last_response']
 }
 
 /**
@@ -653,17 +856,41 @@ function read_csv(data, collectionName){
 
     if (collectionName == "restaurant") {
       restaurant_data = data;
+
     } else if (collectionName == "room_facility") {
       room_facility_data = data;
     } else if (collectionName == "hotel_facility") {
       hotel_facility_data = data;
+
     } else if (collectionName == "tourist_spot") {
       tourist_spot_data = data;
+
     }
 
   } else {
     console.log("Empty Data Collection: " + collectionName);
   }
+
+}
+
+
+function isOpen(time, open, close){
+  var openTime = parseInt(open.substr(0,2))
+  var closeTime = parseInt(close.substr(0,2))
+  var openM;
+  var closeM;
+  var timeM;
+  if(open.indexOf("PM") > -1){
+    openTime += 12
+  }
+
+  if(close.indexOf("PM") > -1){
+    closeTime += 12
+  }
+
+  if (time>= openTime && time < closeTime) return true
+  else return false;
+
 
 }
 
@@ -705,6 +932,17 @@ function check_predict_weather(response, portNum){
   return response;
 }
 
-
-
-
+function mode_control(response, portNum){
+  var url = "https://young-castle-82935.herokuapp.com/api/mode";
+  // var url ="http://localhost:5009/api/mode";
+  var mode;
+  if("room_mode" in response.result.parameters){
+    mode = response.result.parameters["room_mode"];
+      console.log(mode);
+  }
+  request({url:url,qs:{'mode':mode}}, function(err, response, body){
+  if(err){console.log('error:', err);}
+  console.log("Get response: " + response.statusCode);
+  });
+  return response.result.fulfillment.speech;
+}
