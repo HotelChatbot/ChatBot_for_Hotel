@@ -158,6 +158,7 @@ io.on('connection', function(socket){
       // Example to send a message along with a image
 
       var imageURL = "";
+      console.log("sysOutput" + sysOutput)
       if(sysOutput.indexOf("restaurant") > -1 && sysOutput.indexOf("What") == -1){
 
         var imageURL = "image/restaurant/"  + user_data[portNum]['restaurant_name'] + '.png';
@@ -252,13 +253,14 @@ function eval_action(action, response, portNum){
       break;
     case "check_predict_weather":
       response = check_predict_weather(response, portNum);
+
       break;
     case "mode_control":
       response = mode_control(response, portNum);
       break;
   }
 
-  return response
+  return response;
 }
 
 
@@ -283,7 +285,9 @@ function recommend_restaurant(response, portNum){
   }
   if('restaurant_extreme_price' in response.result.parameters){
     extremeRequest = response.result.parameters["restaurant_extreme_price"]
+
   }
+
 
 
 
@@ -306,7 +310,6 @@ function recommend_restaurant(response, portNum){
   var currentPrice = "";
   var currentRestaurant = "";
 
-
   if(extremeRequest.length>0){
     console.log(extremeRequest)
     var lastPrice;
@@ -322,7 +325,9 @@ function recommend_restaurant(response, portNum){
 
         //if the style match the style request
         if( style == user_data[portNum]['restaurant_style'] || styleRequest.length==0){
+
           //if user request
+
           if((parseInt(price) >= parseInt(lastPrice) &&extremeRequest == "most expensive") ||
             (parseInt(price) <= parseInt(lastPrice) &&extremeRequest == "cheapest")){
             currentRestaurant = name;
@@ -696,10 +701,12 @@ function hotel_facility_check_open(response, portNum){
   var date ="";
   var time = "";
   if("hotel_facility_close_open" in response.result.parameters){
+
     closeOrOpen = response.result.parameters["hotel_facility_close_open"];
   }
   if("hotel_facility" in response.result.parameters){
     facility = response.result.parameters["hotel_facility"];
+
   }
   if("date-period" in response.result.parameters){
     date = response.result.parameters["date-period"];
@@ -722,10 +729,12 @@ function hotel_facility_check_open(response, portNum){
       var opening_time = hotel_facility.opening_time;
       var closing_time = hotel_facility.closing_time;
 
+
       if(name == facility){
 
 
         response = "It is closed on " + date;
+
 
       }
     });
@@ -741,20 +750,22 @@ function hotel_facility_check_open(response, portNum){
       var opening_time = hotel_facility.opening_time;
       var closing_time = hotel_facility.closing_time;
 
+
       if(name == facility){
         response = "It is open on " +date;
 
 
         //if the inquiry is about closing or opening time
 
+
         if(closeOrOpen == "close"){
 
           response += " and will closes at "+ closing_time;
         }
         else{
+
           response += " and will opens at "+ opening_time;
         }
-
 
       }
     });
@@ -794,7 +805,6 @@ function hotel_facility_check_open(response, portNum){
         if (specifiedTime)response = "The " + facility + " is " + openOrClose + " then.";
         else response = "The " + facility + " is " + openOrClose + " now.";
 
-
       }
     });
     if(response.length ==0) return "Sorry we don't have such facility.";
@@ -820,7 +830,7 @@ function iot_control(response,portNum){
     if(err) { console.log(err); return "error"; }
     console.log("Get response: " + response.statusCode);
   });
-  // console.log(response.result.fulfillment.speech)
+  // console.log(response.result.fulfillment.speech
   return response.result.fulfillment.speech
 }
 
@@ -884,10 +894,10 @@ function isOpen(time, open, close){
     openTime += 12
   }
 
+
   if(close.indexOf("PM") > -1){
     closeTime += 12
   }
-
   if (time>= openTime && time < closeTime) return true
   else return false;
 

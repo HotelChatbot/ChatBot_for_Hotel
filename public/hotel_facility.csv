@@ -3,6 +3,6 @@ gym,on the fourth floor,9 AM,9 PM
 restaurant,on the first floor,11 AM,9 PM
 swimming pool,on the second floor,10 AM,11 PM
 bar,on the third floor,9 PM,10 AM
-spa, on the second floor by the swimming pool, 10AM, 10PM
-vending machine, by the elevator of every floor, start of any day, end of any day
-parking lot, in the undergrounds, 12 AM, 12 AM of the next day
+spa, on the second floor by the swimming pool,10AM,10PM
+vending machine, by the elevator of every floor,start of any day,end of any day
+parking lot,in the undergrounds,12 AM,12 AM of the next day
