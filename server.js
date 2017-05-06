@@ -144,7 +144,7 @@ io.on('connection', function(socket){
       user_data[portNum]['restaurant_price_request'] = ['<', '1000'];
     }
 
-
+    var isTouristSpot = false;
     // Waiting for the response from api.ai
     request.on('response', function(response) {
       var sysOutput = response.result.fulfillment.speech;
@@ -153,6 +153,7 @@ io.on('connection', function(socket){
       //perform action if needed
       if(action.length > 0) {
         console.log("action",action);
+        if(action.indexOf('tourist')>-1)isTouristSpot = true;
         //decide ouput by evaluating the action
         sysOutput = eval_action(action, response, portNum);
         //console.log(JSON.stringify(sysOutput, null, 2));
@@ -170,6 +171,10 @@ io.on('connection', function(socket){
       if(sysOutput.indexOf("restaurant") > -1 && sysOutput.indexOf("What") == -1){
 
         var imageURL = "image/restaurant/"  + user_data[portNum]['restaurant_name'] + '.png';
+      }
+      else if(isTouristSpot){
+        isTouristSpot = false;
+        var imageURL = "image/tourist_spot/"  + user_data[portNum]['tourist_spot_name'] + '.png';
       }
       console.log("imageURL"+imageURL+imageURL.length);
       var sysOutputObj = {message: sysOutput, image: imageURL};
@@ -536,6 +541,7 @@ function inquire_hotel_facility(response, portNum){
   if(inquiredFacility.length==0){
     return "Which facility are you asking?";
   }
+
   var inquiredLocation= "";
   var inquiredTime = "";
 
@@ -554,7 +560,7 @@ function inquire_hotel_facility(response, portNum){
       inquiredLocation = location;
 
       //if the inquiry is about closing or opening time
-      if(inquiryParameter == "time"){
+      if(closeOrOpen.length>0 || inquiryParameter == "time"){
         if(closeOrOpen == "close"){
           response = name + " will close at "+ closing_time;
         }
@@ -714,13 +720,16 @@ function hotel_facility_check_open(response, portNum){
   var facility="";
   var date ="";
   var time = "";
+
   if("hotel_facility_close_open" in response.result.parameters){
 
     closeOrOpen = response.result.parameters["hotel_facility_close_open"];
   }
-  if("hotel_facility" in response.result.parameters){
+  if("hotel_facility" in response.result.parameters && response.result.parameters.hotel_facility.length >0){
     facility = response.result.parameters["hotel_facility"];
-
+  }
+  else{
+    facility = user_data[portNum]['last_inquired_facility'];
   }
   if("date-period" in response.result.parameters){
     date = response.result.parameters["date-period"];
@@ -734,7 +743,7 @@ function hotel_facility_check_open(response, portNum){
     return "which facility are you talking about";
   }
 
-  if(date == "Saturday" || date == "Sunday"){
+  if( date == "Saturday" || date == "Sunday"){
     reponse = ""
     hotel_facility_data.forEach(function(hotel_facility){
 
