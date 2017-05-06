@@ -80,6 +80,14 @@ var weather_data = {};
 require('./app/routes.js')(app);
 
 
+app.get('/api/confirm', function(req,res){
+  var sysOutput = "Your booking of the restaurant is confirmed."
+  
+  var sysOutputObj = {message: sysOutput, image: ""};
+  io.sockets.emit("response_from_apiai",sysOutputObj);
+  res.json({'status':200})
+});
+
 // Detect any connection
 io.on('connection', function(socket){
 
@@ -135,6 +143,8 @@ io.on('connection', function(socket){
       //current requested price range
       user_data[portNum]['restaurant_price_request'] = ['<', '1000'];
     }
+    
+    //wait for the confirmation and sent to front end
     
 
     // Waiting for the response from api.ai
@@ -246,17 +256,22 @@ function eval_action(action, response, portNum){
       break;
     case "iot_control":
       response = iot_control(response, portNum);
-
+      break;
     case "check_current_weather":
       response = check_current_weather(response, portNum);
       break;
     case "check_predict_weather":
       response = check_predict_weather(response, portNum);
-
+      break;
+    case "reserve_restaurant":
+      response = reserve_restaurant(response, portNum);
+      break;
+    case "room_service_item":
+      response = room_service_item(response, portNum);
       break;
   }   
   
-  return response
+  return response;
 }
 
 
@@ -929,7 +944,39 @@ function check_predict_weather(response, portNum){
   return response;
 }
 
+function reserve_restaurant(response, portNum){
+  context = response.result.contexts[0];
+  console.log(context.parameters.time)
+  console.log(context.parameters.number)
+  var url ="https://jibi-restaurant-management.herokuapp.com/api/reserve"
+  var parameters = {'time':context.parameters.time, 'people':context.parameters.number}
+  request({url:url, qs:parameters},function(err,response, body){
+      if(err) { console.log(err); return "error"; }
+      console.log("Get response: " + response.statusCode);
+    });
+  // console.log(parameters)
+  return response.result.fulfillment.speech;
+}
 
+function room_service_item(response, portNum){
+  var url = "";
+  var room_service_type;
+  var number;
+  if("Roomservicetype" in response.result.parameters){
+    room_service_type = response.result.parameters["Roomservicetype"];
+  }
+
+  if("number" in response.result.parameters){
+    number = response.result.parameters["number"];
+  }
+  var parameters = {Roomservicetype:action, number:number};
+  request({url:url, qs:parameters},function(err,response, body){
+    if(err) { console.log(err); return "error"; }
+    console.log("Get response: " + response.statusCode);
+  });
+  return response.result.fulfillment.speech
+
+}
 
 
 
