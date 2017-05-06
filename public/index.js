@@ -1,6 +1,6 @@
 var isConnectToDemoAgent = true; 
 var shouldSystemPrompt = true;
-
+var lastOutput = "";
 $(function() {
   $('#serverToggle').change(function() {
     isConnectToDemoAgent = this.checked;
@@ -118,6 +118,7 @@ $(function() {
     // Wait for the response from the server along with the response from api.ai
     socket.on("response_from_apiai", function(response){
       console.log("response_from_apiai: " + response.message);
+      if(lastOutput!= response.message && response.message == "Your booking of the restaurant is confirmed.") sysCanOutput=true;
       // Speak out the response
       produce_voice_output(response);
       
@@ -144,6 +145,7 @@ $(function() {
     if(sysCanOutput){
       // Wait for next user speech initiative
       sysCanOutput = false;
+      lastOutput = obj.message;
       var text = obj.message;
       var imageAddr = obj.image;
       // Check whether the browser support the synthesisor
