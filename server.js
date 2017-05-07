@@ -70,6 +70,7 @@ app.use(bodyParser.json());
 // parse application/vnd.api+json as json
 app.use(bodyParser.json({type: 'application/vnd.api+json'}));
 
+
 var user_data = {};
 var restaurant_data = [];
 var room_facility_data = [];
@@ -77,7 +78,7 @@ var hotel_facility_data = [];
 var tourist_spot_data = [];
 var weather_data = {};
 // Build up the routers
-require('./app/routes.js')(app);
+require('./app/routes.js')(app, io);
 
 
 app.get('/api/confirm', function(req,res){

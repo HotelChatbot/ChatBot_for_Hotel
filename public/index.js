@@ -212,5 +212,12 @@ $(function() {
     socket.emit("annyang", "Speech Recognition is closed");
   }
 
+  // Uber communications
+  socket.on("uber profile", function(response){
+    alert('catch');
+    //$('#uber_button').src = profile.picture;
+    $("#uber_button").attr("src",profile.picture);
+  });
+
 
 }); // The end of jQuery onLoad()
