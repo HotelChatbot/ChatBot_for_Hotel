@@ -3,7 +3,7 @@ var Restaurant = require('./models/Restaurant');
 
 // Uber Configuration
 var Uber = require('node-uber');
-
+var url = require('url');
 var CLIENT_ID = "IN9Xc4-wQps7sR2t-uRjKjjp9hXVtYY1";
 var CLIENT_SECRET = "eoqfWkuAORNOF4yeWXOgTzjDMv_hxTEZolwJ3GES";
 var SERVER_TOKEN = "ylwCO7P_HytTy-QhuIOgAVMiAZax1XP_bAp23mxz";
