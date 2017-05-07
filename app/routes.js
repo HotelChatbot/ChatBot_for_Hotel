@@ -93,12 +93,28 @@ module.exports = function(app, io) {
   app.get('/api/uber/login/complete', function(request, response) {
     //response.send('Authorization Complete\nPlease Try the following APIs:\n(1)/api/products\n(2)/api/getEstimates\n(3)/api/getPriceForRouteByAddressAsync\n(4)/api/getETAForLocationAsync\n(5)getPriceForRoute')
     response.redirect("/");
-    updateUberProfile(io);
-    //console.log(profile);
-    //console.log("1234567890");
-    //console.log(profile);
-    
+    updateUberProfile(io);    
   });
+
+  // Uber get price for a route
+  // provide two parameters: startAddr and endAddr
+  app.get('/api/uber/getTripInfo', function(request, response) {
+
+    var query = url.parse(request.url, true).query;
+
+    uber.estimates.getPriceForRouteByAddressAsync(query.startAddr, query.endAddr)
+    .then(function(res) {
+        response.json(res);
+    })
+    .error(function(err) {
+      console.error(err);
+      response.sendStatus(500);
+    });
+  });
+
+
+
+
 
 
 
