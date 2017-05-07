@@ -5,6 +5,8 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 // Constanize the port number
 var port = process.env.PORT || 8080;
+//synchonous request
+var syncRequest = require('sync-request');
 
 // Use mongoose to manipulate mongoDB
 var mongoose = require('mongoose');
@@ -20,6 +22,8 @@ var apiai = require('apiai');
 // Http Request
 var request = require('request');
 
+//convert string address to real address
+var geocoder = require('geocoder');
 // Global Initialization
 var TOKEN_DemoAgent = "ecc353311a954139b3ff036c8f6eb2ae";
 var TOKEN_ServerTest = "8010c7fae89f4faeb8fe10470ae77742";
@@ -70,14 +74,17 @@ app.use(bodyParser.json());
 // parse application/vnd.api+json as json
 app.use(bodyParser.json({type: 'application/vnd.api+json'}));
 
+
 var user_data = {};
 var restaurant_data = [];
 var room_facility_data = [];
 var hotel_facility_data = [];
 var tourist_spot_data = [];
 var weather_data = {};
+var uber_data ={};
+
 // Build up the routers
-require('./app/routes.js')(app);
+require('./app/routes.js')(app, io);
 
 
 app.get('/api/confirm', function(req,res){
@@ -155,7 +162,7 @@ io.on('connection', function(socket){
         console.log("action",action);
         if(action.indexOf('tourist')>-1)isTouristSpot = true;
         //decide ouput by evaluating the action
-        sysOutput = eval_action(action, response, portNum);
+        sysOutput = eval_action(action, response, portNum, socket);
         //console.log(JSON.stringify(sysOutput, null, 2));
         console.log("Chatbot: " + sysOutput);
       }
@@ -168,7 +175,7 @@ io.on('connection', function(socket){
 
       var imageURL = "";
       console.log("sysOutput" + sysOutput)
-      if(sysOutput.indexOf("restaurant") > -1 && sysOutput.indexOf("What") == -1){
+      if(sysOutput.indexOf("restaurant") > -1 && sysOutput.indexOf("What") == -1 &&sysOutput.indexOf('hotel') == -1){
 
         var imageURL = "image/restaurant/"  + user_data[portNum]['restaurant_name'] + '.png';
       }
@@ -176,7 +183,7 @@ io.on('connection', function(socket){
         isTouristSpot = false;
         var imageURL = "image/tourist_spot/"  + user_data[portNum]['tourist_spot_name'] + '.png';
       }
-      console.log("imageURL"+imageURL+imageURL.length);
+      
       var sysOutputObj = {message: sysOutput, image: imageURL};
 
       // Send message without an image
@@ -187,6 +194,18 @@ io.on('connection', function(socket){
       socket.emit("response_from_apiai",sysOutputObj);
 
     });
+
+    // Uber login
+    //app.get('/api/uber', function(request, response) {
+      //var url = uber.getAuthorizeUrl(['history','profile', 'places']);
+      //response.redirect(url);
+
+    //});
+
+    //console.log(route.getUberProfile());
+
+
+
 
     request.on('error', function(error) {
       console.log(error);
@@ -204,9 +223,34 @@ weather.find({search: 'Hong Kong SAR', degreeType: 'C'}, function(err, result) {
   weather_data = result[0];
 });
 
+// Load Uber Data beforehand to speed up response
+var locations = ['IFC Hong Kong', 'Central Hong Kong', 'Hong Kong Museum of Art', 'HKUST']
+
+
+locations.forEach(function(location){
+  var parameters = {startAddr:'HKUST Hong Kong', endAddr:location};
+  var url = "http://localhost:8080/api/uber/getTripInfo";
+  var res = ""
+  request({url:url, qs:parameters},function(err,body, response){
+    if(err) { console.log(err); return "error"; }
+    // console.log("Get response: " + body.statusCode);
+    
+    // console.log(JSON.parse(response).prices[1])
+    uber_data[location] = JSON.parse(response).prices[1];
+        
+    });
+
+});
+
+
 // Listening on the port
 http.listen(port, function(){
   console.log('listening on *:' + port);
+  location = "IFC Hong Kong"
+  var parameters = {startAddr:'HKUST Hong Kong', endAddr:location};
+  
+  var url = "http://localhost:8080/api/uber/getTripInfo";
+
 });
 
 
@@ -219,7 +263,7 @@ http.listen(port, function(){
 * @param {Integer} portNum Current end user's port number connecting to the server
 * @return {String} response Speech response that will return to the end user.
 */
-function eval_action(action, response, portNum){
+function eval_action(action, response, portNum,socket){
   switch(action){
     case "recommend_restaurant":
     case "recommend_another_restaurant":
@@ -280,6 +324,12 @@ function eval_action(action, response, portNum){
 
     case "room_service_item":
       response = mode_control(response, portNum);
+      break;
+    case "request_uber":
+      response = request_uber(response, portNum,socket);
+      break;
+    case "room_service_food":
+      response = room_service_food(response, portNum);
       break;
   }
 
@@ -1026,3 +1076,47 @@ function room_service_item(response, portNum){
 
 }
 
+function request_uber(response, portNum,socket){
+  var location =  response.result.parameters.Location;
+
+  //check if location is presented
+  if(location.length == 0 ) return response.result.fulfillment.speech
+  
+  
+  var url = "http://localhost:8080/api/uber/getTripInfo";
+  var res = ""
+  var data = uber_data[location];
+  var time = data.duration/60;
+  var cost = data.estimate.split('-')[0];
+
+  response = "It takes around " + time + " minutes to " + location + ", and it costs "+ cost+ '. Are you sure you want to book a car?';
+
+  return response;
+}
+
+function room_service_food(response, portNum){
+  var url = "https://staff-screen.herokuapp.com/api/task";
+  var room_service_type;
+  var number;
+  if("room-service-food-detail" in response.result.parameters){
+    room_service_type = response.result.parameters["room-service-food-detail"];
+  }
+  
+
+  if("number" in response.result.parameters){
+    number = response.result.parameters["number"];
+  }
+
+  if(number.length ==0 || room_service_type.length ==0) return response.result.fulfillment.speech
+  room_service_type = room_service_type.join();
+  number = number.join()
+  console.log(room_service_type)
+  console.log(number)
+  var parameters = {items:room_service_type, numbers:number};
+
+  request({url:url, qs:parameters},function(err,response, body){
+    if(err) { console.log(err); return "error"; }
+    console.log("Get response: " + response.statusCode);
+  });
+  return response.result.fulfillment.speech
+}
