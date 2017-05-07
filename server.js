@@ -152,6 +152,7 @@ io.on('connection', function(socket){
     }
     //flag for checking if the action is inquiring tourist spot
     var isTouristSpot = false;
+   
     // Waiting for the response from api.ai
     request.on('response', function(response) {
       var sysOutput = response.result.fulfillment.speech;
@@ -177,11 +178,15 @@ io.on('connection', function(socket){
       console.log("sysOutput" + sysOutput)
       if(sysOutput.indexOf("restaurant") > -1 && sysOutput.indexOf("What") == -1 &&sysOutput.indexOf('hotel') == -1){
 
-        var imageURL = "image/restaurant/"  + user_data[portNum]['restaurant_name'] + '.png';
+        imageURL = "image/restaurant/"  + user_data[portNum]['restaurant_name'] + '.png';
       }
       else if(isTouristSpot){
         isTouristSpot = false;
-        var imageURL = "image/tourist_spot/"  + user_data[portNum]['tourist_spot_name'] + '.png';
+        imageURL = "image/tourist_spot/"  + user_data[portNum]['tourist_spot_name'] + '.png';
+      }
+
+      if(sysOutput.indexOf('Sure! We currently')>-1){
+        imageURL = 'image/menu.png'; 
       }
       
       var sysOutputObj = {message: sysOutput, image: imageURL};
