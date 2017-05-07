@@ -31,6 +31,7 @@ var GPS = {
   }
 }
 
+// Update Uber Profile
 function updateUberProfile(io){
   console.log("update uber profile");
   uber.user.getProfile(function (err, res) {

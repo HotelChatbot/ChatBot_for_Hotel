@@ -308,3 +308,9 @@ body {
 .image {
   width: 100%;
 }
+
+.rpic {
+  border-radius: 20%;          
+  border-style: solid;
+  border-width: 2px;
+}

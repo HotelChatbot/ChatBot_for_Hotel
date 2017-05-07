@@ -217,7 +217,9 @@ $(function() {
     //alert('catch');
     //$('#uber_button').src = profile.picture;
     $("#uber_button").attr("src", response.picture);
-    alert(response.picture);
+    $("#uber_name").text(response.first_name + " " + response.last_name);
+    //$("#uber_verified").text("[Verified by Uber]");
+    //alert(response.picture);
 
   });
 
