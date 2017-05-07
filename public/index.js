@@ -214,9 +214,11 @@ $(function() {
 
   // Uber communications
   socket.on("uber profile", function(response){
-    alert('catch');
+    //alert('catch');
     //$('#uber_button').src = profile.picture;
-    $("#uber_button").attr("src",profile.picture);
+    $("#uber_button").attr("src", response.picture);
+    alert(response.picture);
+
   });
 
 

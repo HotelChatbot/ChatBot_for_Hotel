@@ -31,13 +31,17 @@ var GPS = {
   }
 }
 
-
-function getUberProfile(){
+function updateUberProfile(io){
+  console.log("update uber profile");
   uber.user.getProfile(function (err, res) {
     if (err) return err;
-    else return res;
+    else {
+      io.sockets.emit("uber profile", res);
+      return res;
+    }
   });
 }
+
 
 
 // Prepare the model API for usage
@@ -88,9 +92,13 @@ module.exports = function(app, io) {
   app.get('/api/uber/login/complete', function(request, response) {
     //response.send('Authorization Complete\nPlease Try the following APIs:\n(1)/api/products\n(2)/api/getEstimates\n(3)/api/getPriceForRouteByAddressAsync\n(4)/api/getETAForLocationAsync\n(5)getPriceForRoute')
     response.redirect("/");
-    var profile = getUberProfile();
+    updateUberProfile(io);
     //console.log(profile);
-    io.sockets.emit("uber profile", profile);
+    //console.log("1234567890");
+    //console.log(profile);
+    
   });
+
+
 
 }

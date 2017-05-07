@@ -77,6 +77,7 @@ var room_facility_data = [];
 var hotel_facility_data = [];
 var tourist_spot_data = [];
 var weather_data = {};
+
 // Build up the routers
 require('./app/routes.js')(app, io);
 
@@ -188,6 +189,18 @@ io.on('connection', function(socket){
       socket.emit("response_from_apiai",sysOutputObj);
 
     });
+
+    // Uber login
+    //app.get('/api/uber', function(request, response) {
+      //var url = uber.getAuthorizeUrl(['history','profile', 'places']);
+      //response.redirect(url);
+
+    //});
+
+    //console.log(route.getUberProfile());
+
+
+
 
     request.on('error', function(error) {
       console.log(error);
