@@ -38,7 +38,7 @@ function updateUberProfile(io){
   uber.user.getProfile(function (err, res) {
     if (err) return err;
     else {
-      console.log("uber profile in server");
+      //console.log("uber profile in server");
       io.sockets.emit("uber profile", res);
       return res;
     }
@@ -95,7 +95,7 @@ module.exports = function(app, io) {
   app.get('/api/uber/login/complete', function(request, response) {
     //response.send('Authorization Complete\nPlease Try the following APIs:\n(1)/api/products\n(2)/api/getEstimates\n(3)/api/getPriceForRouteByAddressAsync\n(4)/api/getETAForLocationAsync\n(5)getPriceForRoute')
     response.redirect("/");
-    console.log('login complete');
+    //console.log('login complete');
     updateUberProfile(io);    
   });
 
