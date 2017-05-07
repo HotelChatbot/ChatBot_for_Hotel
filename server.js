@@ -143,7 +143,7 @@ io.on('connection', function(socket){
       //current requested price range
       user_data[portNum]['restaurant_price_request'] = ['<', '1000'];
     }
-
+    //flag for checking if the action is inquiring tourist spot
     var isTouristSpot = false;
     // Waiting for the response from api.ai
     request.on('response', function(response) {
@@ -275,6 +275,10 @@ function eval_action(action, response, portNum){
       break;
 
     case "mode_control":
+      response = mode_control(response, portNum);
+      break;
+
+    case "room_service_item":
       response = mode_control(response, portNum);
       break;
   }
@@ -995,17 +999,25 @@ function reserve_restaurant(response, portNum){
 }
 
 function room_service_item(response, portNum){
-  var url = "";
+  var url = "https://staff-screen.herokuapp.com/api/task";
   var room_service_type;
   var number;
   if("Roomservicetype" in response.result.parameters){
     room_service_type = response.result.parameters["Roomservicetype"];
   }
+  
 
   if("number" in response.result.parameters){
     number = response.result.parameters["number"];
   }
-  var parameters = {Roomservicetype:action, number:number};
+
+  if(number.length ==0 || room_service_type.length ==0) return response.result.fulfillment.speech
+  room_service_type = room_service_type.join();
+  number = number.join()
+  console.log(room_service_type)
+  console.log(number)
+  var parameters = {items:room_service_type, numbers:number};
+
   request({url:url, qs:parameters},function(err,response, body){
     if(err) { console.log(err); return "error"; }
     console.log("Get response: " + response.statusCode);
@@ -1013,3 +1025,4 @@ function room_service_item(response, portNum){
   return response.result.fulfillment.speech
 
 }
+
