@@ -38,6 +38,7 @@ function updateUberProfile(io){
   uber.user.getProfile(function (err, res) {
     if (err) return err;
     else {
+      console.log("uber profile in server");
       io.sockets.emit("uber profile", res);
       return res;
     }
