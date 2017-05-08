@@ -13,6 +13,8 @@ var mongoose = require('mongoose');
 // Load the database config
 var database = require('./config/database');
 
+
+
 // Parse the request body
 var bodyParser = require('body-parser');
 
@@ -82,7 +84,8 @@ var hotel_facility_data = [];
 var tourist_spot_data = [];
 var weather_data = {};
 var uber_data ={};
-
+// Mapping of the tourist spot
+var tourist_spot_map={'architecture': 'historic architecture', 'art': 'gallery', 'hiking': 'mountain trail', 'museum': 'museum', 'park': 'park', 'nature': 'natural spot', 'shopping': 'shopping place', 'sports': 'sports facility', 'nightLife': 'fun place', 'zoo': 'zoo', 'temple': 'religious place', 'whatever':'place'};
 // Build up the routers
 require('./app/routes.js')(app, io);
 
@@ -180,7 +183,7 @@ io.on('connection', function(socket){
 
         imageURL = "image/restaurant/"  + user_data[portNum]['restaurant_name'] + '.png';
       }
-      else if(isTouristSpot){
+      else if(isTouristSpot && sysOutput.indexOf("Sorry we cannot find any tourist spot") == -1){
         isTouristSpot = false;
         imageURL = "image/tourist_spot/"  + user_data[portNum]['tourist_spot_name'] + '.png';
       }
@@ -692,7 +695,9 @@ function recomend_tourist_spot_with_type(response, portNum){
 
   if('tourist-spot-architecture' in response.result.parameters){
     //set style as the response passed by user
+
     user_data[portNum]['tourist_spot_style'] = response.result.parameters["tourist-spot-architecture"];
+    console.log(user_data[portNum]['tourist_spot_style'])
   }
   return recommend_tourist_spot(response,portNum);
 
@@ -716,6 +721,7 @@ function recommend_tourist_spot(response,portNum){
     var price = tourist_spot.price;
     var style = tourist_spot.style;
     var distance = tourist_spot.distance;
+
     //if the restaurant has not been recommended yet
     if(!user_data[portNum]['recommend_tourist_spot'].has( name )){
 
@@ -742,10 +748,13 @@ function recommend_tourist_spot(response,portNum){
   else{
     //add current restaurant to the set so that you don't duplicate recommendation
     user_data[portNum]['recommend_tourist_spot'].add(currentTouristSpot);
-
+    var place = user_data[portNum]['tourist_spot_style'];
+    if (place in tourist_spot_map){
+      place = tourist_spot_map[place];
+    }
     console.log(user_data);
     //concatenate data into response
-    response = "Here is a "+ user_data[portNum]['tourist_spot_style'] + " called " + currentTouristSpot +" that is " + currentDistance +" away from you.";
+    response = "Here is a "+ place + " called " + currentTouristSpot +" that is " + currentDistance +" away from you.";
   }
 
   return response;
