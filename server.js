@@ -242,7 +242,7 @@ locations.forEach(function(location){
     
     // console.log(JSON.parse(response).prices[1])
     uber_data[location] = JSON.parse(response).prices[1];
-        
+    console.log(uber_data)    
     });
 
 });
