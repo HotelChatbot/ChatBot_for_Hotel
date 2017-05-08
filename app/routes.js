@@ -7,7 +7,7 @@ var url = require('url');
 var CLIENT_ID = "IN9Xc4-wQps7sR2t-uRjKjjp9hXVtYY1";
 var CLIENT_SECRET = "eoqfWkuAORNOF4yeWXOgTzjDMv_hxTEZolwJ3GES";
 var SERVER_TOKEN = "ylwCO7P_HytTy-QhuIOgAVMiAZax1XP_bAp23mxz";
-var REDIRECT_URL = "http://localhost:8080/api/uber/callback";
+var REDIRECT_URL = "https://hotel-agent.herokuapp.com/api/uber/callback";
 
 var uber = new Uber({
   client_id: CLIENT_ID,
