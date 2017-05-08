@@ -234,7 +234,7 @@ var locations = ['IFC Hong Kong', 'Central Hong Kong', 'Hong Kong Museum of Art'
 
 locations.forEach(function(location){
   var parameters = {startAddr:'HKUST Hong Kong', endAddr:location};
-  var url = "http://localhost:8080/api/uber/getTripInfo";
+  var url = "https://hotel-agent.herokuapp.com/api/uber/getTripInfo";
   var res = ""
   request({url:url, qs:parameters},function(err,body, response){
     if(err) { console.log(err); return "error"; }
@@ -242,7 +242,7 @@ locations.forEach(function(location){
     
     // console.log(JSON.parse(response).prices[1])
     uber_data[location] = JSON.parse(response).prices[1];
-        
+    console.log(uber_data)    
     });
 
 });
