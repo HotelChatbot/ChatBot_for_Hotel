@@ -242,7 +242,7 @@ locations.forEach(function(location){
     
     // console.log(JSON.parse(response).prices[1])
     uber_data[location] = JSON.parse(response).prices[1];
-    console.log(uber_data)    
+   
     });
 
 });
@@ -254,7 +254,9 @@ http.listen(port, function(){
   location = "IFC Hong Kong"
   var parameters = {startAddr:'HKUST Hong Kong', endAddr:location};
   
+
   var url = "https://hotel-agent.herokuapp.com/api/uber/getTripInfo";
+
 
 });
 
