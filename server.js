@@ -475,7 +475,7 @@ function recommend_restaurant(response, portNum){
 
     console.log(user_data);
     //concatenate data into response
-    response = "Here is a "+ user_data[portNum]['restaurant_style'] + " restaurant called " + currentRestaurant +" that costs around " +user_data[portNum]['restaurant_price'] + ". Would you like to make an order?";
+    response = "Here is a "+ user_data[portNum]['restaurant_style'] + " restaurant called " + currentRestaurant +" that costs around " +user_data[portNum]['restaurant_price'] + ". Would you like to make a reservation?";
   }
 
 
