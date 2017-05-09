@@ -475,7 +475,7 @@ function recommend_restaurant(response, portNum){
 
     console.log(user_data);
     //concatenate data into response
-    response = "Here is a "+ user_data[portNum]['restaurant_style'] + " restaurant called " + currentRestaurant +" that costs around " +user_data[portNum]['restaurant_price'];
+    response = "Here is a "+ user_data[portNum]['restaurant_style'] + " restaurant called " + currentRestaurant +" that costs around " +user_data[portNum]['restaurant_price'] + ". Would you like to make an order?";
   }
 
 
@@ -1068,13 +1068,14 @@ function room_service_item(response, portNum){
   var url = "https://staff-screen.herokuapp.com/api/task";
   var room_service_type;
   var number;
-  if("Roomservicetype" in response.result.parameters){
-    room_service_type = response.result.parameters["Roomservicetype"];
+  if("Roomservicetype" in response.result.contexts[0].parameters){
+    room_service_type = response.result.contexts[0].parameters["Roomservicetype"];
+    console.log(room_service_type)
   }
   
 
-  if("number" in response.result.parameters){
-    number = response.result.parameters["number"];
+  if("number" in response.result.contexts[0].parameters){
+    number = response.result.contexts[0].parameters["number"];
   }
 
   if(number.length ==0 || room_service_type.length ==0) return response.result.fulfillment.speech
@@ -1136,3 +1137,4 @@ function room_service_food(response, portNum){
   });
   return response.result.fulfillment.speech
 }
+
