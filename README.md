@@ -43,3 +43,9 @@ There are two sets of technical document, which are located at ```public/out_bac
 1. The **blue microphone button** at the left-bottom of your browser is clickable to enable/disable speech recognizer, please click to activate the button when speaking. Feel free to disable it when the chatbot is idle.
 2. The **message textbox** at the left-middle of your browser allows text input to replace speaking if you like. It provides alternative availability for user who is under the circumstance that is not speak-convenient.
 3. The **mode button** at the left-middle of your browser is for developer to test their server availability. Please be reminded that it is not for user intention.
+
+## External Systems
+There are three external systems build alongside with the core system, including room display, staff screen and restaurant management. The links below support direct access to the aforementioned system:
+1. Room Display: [link](https://young-castle-82935.herokuapp.com)
+2. Staff Screen: [link](https://staff-screen.herokuapp.com)
+3. Restaurant Management: [link](https://jibi-restaurant-management.herokuapp.com)
