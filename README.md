@@ -46,6 +46,6 @@ There are two sets of technical document, which are located at ```public/out_bac
 
 ## External Systems
 There are three external systems build alongside with the core system, including room display, staff screen and restaurant management. The links below support direct access to the aforementioned system:
-1. Room Display: [link](https://young-castle-82935.herokuapp.com)
-2. Staff Screen: [link](https://staff-screen.herokuapp.com)
-3. Restaurant Management: [link](https://jibi-restaurant-management.herokuapp.com)
+1. Room Display: [link](https://young-castle-82935.herokuapp.com) [github](https://github.com/ysunaw/lightdisplay)
+2. Staff Screen: [link](https://staff-screen.herokuapp.com) [github](https://github.com/kliuae/staff-screen)
+3. Restaurant Management: [link](https://jibi-restaurant-management.herokuapp.com) [github](https://github.com/khuangaf/restaurantScreen)
