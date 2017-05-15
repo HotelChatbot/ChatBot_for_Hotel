@@ -502,7 +502,7 @@ function restaurant_give_detail(response, portNum){
     //if the restaurant has not recommended yet
     if(name == user_data[portNum]['restaurant_name']){
 
-        response = "the restaurant is located at " + location + " and it costs you around "+ price;
+        response = "the restaurant is " + location + " away from you, and it costs you around "+ price;
     }
 
   });
@@ -1098,7 +1098,7 @@ function request_uber(response, portNum,socket){
 
   //check if location is presented
   if(location.length == 0 ) return response.result.fulfillment.speech
-  
+  if (!(location in uber_data)) return "Sorry, we cannot find this place.";
   
   var url = "https://hotel-agent.herokuapp.com/api/uber/getTripInfo";
   var res = ""
