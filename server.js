@@ -341,6 +341,10 @@ function eval_action(action, response, portNum,socket){
     case "room_service_food":
       response = room_service_food(response, portNum);
       break;
+    case "alarm_clock_set":
+      response = alarm_clock_set(response, portNum);
+      
+      break;
   }
 
   return response;
@@ -1138,3 +1142,91 @@ function room_service_food(response, portNum){
   return response.result.fulfillment.speech
 }
 
+function alarm_clock_set(response, portNum){
+  // initialize and extract parameters - alarm time and date
+  var time = "";
+  var date = "";
+  var time_utterance = "";
+  var date_utterance = "";
+  var isTomorrow = false;
+  if ('alarm-time' in response.result.parameters && response.result.parameters["alarm-time"].length >0 ){
+    time = response.result.parameters["alarm-time"];
+
+  }
+  else return response.result.fulfillment.speech;
+  if ('alarm-date' in response.result.parameters && response.result.parameters["alarm-date"].length >0){
+    date = response.result.parameters["alarm-date"];
+    var theDate = new Date(date);
+    theDate = theDate.getDate();
+    var today = new Date();
+    today = today.getDate();
+    if(theDate - today == 1){
+      isTomorrow = true;
+      date_utterance = "tomorrow";
+    }
+  }
+  else {
+    isTomorrow = true;
+    date_utterance = "tomorrow";
+  }
+
+
+  
+  // split the received string into processable arrays
+  if (time && time.length > 0){
+    time = time.split(':');
+  }
+  if (date && date.length > 0){
+    date = date.split('-');
+  }
+  // generate listener-friendly time utterances
+  if (time[1] == '00'){
+    time_utterance = parseInt(time[0]) + " o'clock ";
+  }
+  else{
+    time_utterance = parseInt(time[0]) + ":" + parseInt(time[1]);
+  }
+  // generate listerner-friendly date utterances
+  if (!isTomorrow &&date[0] == '2017'){
+    if (date[1] == '01'){
+      date_utterance = 'January ' + date[2] + 'th ';
+    }
+    else if (date[1] == '02'){
+      date_utterance = 'February ' + date[2] + 'th ';
+    }
+    else if (date[1] == '03'){
+      date_utterance = 'March ' + date[2] + 'th ';
+    }
+    else if (date[1] == '04'){
+      date_utterance = 'April ' + date[2] + 'th ';
+    }
+    else if (date[1] == '05'){
+      date_utterance = 'May ' + date[2] + 'th ';
+    }
+    else if (date[1] == '06'){
+      date_utterance = 'June ' + date[2] + 'th ';
+    }
+    else if (date[1] == '07'){
+      date_utterance = 'July ' + date[2] + 'th ';
+    }
+    else if (date[1] == '08'){
+      date_utterance = 'August ' + date[2] + 'th ';
+    }
+    else if (date[1] == '09'){
+      date_utterance = 'September ' + date[2] + 'th ';
+    }
+    else if (date[1] == '10'){
+      date_utterance = 'October ' + date[2] + 'th ';
+    }
+    else if (date[1] == '11'){
+      date_utterance = 'November ' + date[2] + 'th ';
+    }
+    else if (date[1] == '12'){
+      date_utterance = 'December ' + date[2] + 'th ';
+    }
+  }
+  // generate the response utterance
+  response = 'The alarm clock is sucessfully set at ' + time_utterance + ', ' + date_utterance + '  for you.';
+  
+  return response;
+}
